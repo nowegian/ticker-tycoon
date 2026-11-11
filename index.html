@@ -547,11 +547,11 @@ function ringBell(){
     const out=ctx.createGain(); out.gain.value=vol; out.connect(ctx.destination);
     const bus=ctx.createGain(), hp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter();
     hp.type='highpass'; hp.frequency.value=160; lp.type='lowpass'; lp.frequency.value=5000;
-    const dry=ctx.createGain(); dry.gain.value=1; const wet=ctx.createGain(); wet.gain.value=0.32;
+    const dry=ctx.createGain(); dry.gain.value=1; const wet=ctx.createGain(); wet.gain.value=0.16;
     const conv=ctx.createConvolver(); conv.buffer=hallBuffer(ctx);
     bus.connect(hp).connect(lp); lp.connect(dry).connect(out); lp.connect(conv).connect(wet).connect(out);
     // a slight echo: repeats about a quarter second later, fading each time
-    const dl=ctx.createDelay(1), fb=ctx.createGain(), ec=ctx.createGain(); dl.delayTime.value=0.26; fb.gain.value=0.28; ec.gain.value=0.22;
+    const dl=ctx.createDelay(1), fb=ctx.createGain(), ec=ctx.createGain(); dl.delayTime.value=0.26; fb.gain.value=0.1; ec.gain.value=0.09;
     lp.connect(dl); dl.connect(fb).connect(dl); dl.connect(ec).connect(out);
     // uneven hammer: strikes about 21 times a second with a little jitter, the first few a touch harder
     const strikes=[]; for(let k=0,t=t0; k<4; k++, t+=0.38*(1+(Math.random()-.5)*0.08)) strikes.push(t);
