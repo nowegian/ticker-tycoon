@@ -580,7 +580,7 @@ function confetti(){
 }
 
 // ================= STATE =================
-let ffing=false;
+let ffing=false, quietMorning=false;
 let tradeMode='now', orderType='obuy', orderLot='';
 let S, tab='market', sheetSym=null, sheetNpc=null, timer=null, paused=false, speed=1, skipping=false;
 
@@ -708,7 +708,7 @@ function fireBreak(item){
   S.breaking.unshift({time:clockStr(t),text:b.text,sym:b.sym,move:mv,blurb:b.blurb});
   addLog(`BREAKING ${clockStr(t)}: ${b.text}`,'break',`${b.sym||'Market'} ${pct(mv)}`,mv>=0);
   if(b.sym && S.holdings[b.sym]) S.ffHeldBreak=b.sym;
-  if(!ffing){ toast(`🚨 ${b.text}`); sfx('news'); buzz([60,40,60]); }
+  if(!ffing && !quietMorning){ toast(`🚨 ${b.text}`); sfx('news'); buzz([60,40,60]); }
 }
 function startTimer(){ clearInterval(timer); timer=setInterval(tick, TICK_MS/speed); }
 function stopTimer(){ clearInterval(timer); timer=null; }
@@ -731,7 +731,10 @@ function skipToClose(){ if(!isOpen()) return; skipping=true; while(S.t<TICKS) st
 function goMidday(){
   if(isOpen()||S.over) return;
   if(S.queue.length){ showQueue(); return; }
-  openMarket(); while(S.t<MID) stepTick(); paused=true;
+  quietMorning=true; openMarket(); while(S.t<MID) stepTick(); paused=true; quietMorning=false;
+  const nb=S.breaking.length, held=S.breaking.filter(b=>b.sym&&S.holdings[b.sym]).map(b=>b.sym);
+  if(nb) setTimeout(()=>{ if(!isOpen()) return; sfx('news'); buzz([60,40,60]);
+    toast(nb===1 ? `🚨 Breaking this morning: ${S.breaking[0].text}` : `🚨 ${nb} breaking stories this morning${held.length?` (incl. ${[...new Set(held)].join(', ')}, which you own)`:''}`); }, S.sound?2100:300);
   filledSyms.clear(); save(); render(); window.scrollTo(0,0);
   if(sheetSym) openTrade(sheetSym);
 }
