@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ticker Tycoon</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ticker Tycoon">
+<meta name="theme-color" content="#0d1410">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1410; --panel:#142019; --panel2:#1b2a21; --line:#24382c;
+  --ink:#e7f2ea; --dim:#8aa596; --green:#3ee08f; --red:#ff5d6c; --gold:#f6c453; --blue:#6cc4ff;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'IBM Plex Sans',system-ui,sans-serif; --pix:'Press Start 2P',monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#070b09;color:var(--ink);font-family:var(--sans);height:100%}
+body{display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100%;background:var(--bg);position:relative;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(#0d1410 88%,#0d141000);padding:12px 14px 8px}
+.brand{display:flex;justify-content:space-between;align-items:center}
+.brand h1{font-family:var(--pix);font-size:12px;letter-spacing:1px;margin:0;color:var(--green)}
+.brand .day{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.stats{display:grid;grid-template-columns:1fr 1fr 64px;gap:8px;margin-top:10px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.stat .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.stat .v{font-family:var(--mono);font-size:16px;font-weight:600;margin-top:2px}
+.ticker{overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:10px;font-family:var(--mono);font-size:11px;padding:5px 0}
+.ticker span.t{display:inline-block;animation:scroll 50s linear infinite;padding-left:20%}
+@keyframes scroll{to{transform:translateX(-100%)}}
+main{flex:1;padding:4px 14px 150px}
+.up{color:var(--green)} .down{color:var(--red)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin:16px 0 8px;font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.due{display:flex;align-items:center;gap:10px;background:#2a2410;border:1px solid #5a4a18;border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer}
+.due.hot{background:#2e1418;border-color:#6a2430}
+.due .em{font-size:24px}
+.due .t{flex:1;font-size:13px;line-height:1.3}
+.due .t b{display:block;font-size:14px}
+.due .dl{font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right;white-space:nowrap}
+.due.hot .dl{color:var(--red)}
+.paper{background:#f3ecd8;color:#1f1a10;border-radius:12px;padding:12px 14px;border:1px solid #d9cfb2}
+.paper .mast{font-family:var(--pix);font-size:10px;text-align:center;border-bottom:2px solid #1f1a10;padding-bottom:8px;margin-bottom:6px}
+.paper .sub{font-size:10px;text-align:center;margin-bottom:6px;color:#5c5340}
+.headline{padding:8px 0;border-top:1px dashed #b8ad8f;cursor:pointer;display:flex;gap:8px;align-items:flex-start}
+.headline:first-of-type{border-top:none}
+.paper .tag{font-family:var(--mono);font-size:9px;font-weight:600;background:#1f1a10;color:#f3ecd8;padding:2px 5px;border-radius:3px;white-space:nowrap;margin-top:2px}
+.paper .tag.rumor{background:#a8462e}
+.paper .tag.mkt{background:#2c5a8a}
+.headline .txt{font-family:Georgia,serif;font-size:15px;line-height:1.25;font-weight:700}
+.headline .mv{font-family:var(--mono);font-size:11px;font-weight:600;margin-top:3px}
+.headline .mv.up{color:#16784a}.headline .mv.down{color:#b3263a}
+.row{display:grid;grid-template-columns:1fr 70px 88px;align-items:center;gap:8px;padding:11px 12px;border-top:1px solid var(--line);cursor:pointer}
+.row:first-child{border-top:none}
+.row:active,.npc:active{background:var(--panel2)}
+.sym{font-family:var(--mono);font-weight:600;font-size:15px}
+.nm{font-size:11px;color:var(--dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.px{text-align:right;font-family:var(--mono)}
+.px .p{font-size:15px;font-weight:600}
+.px .c{font-size:11px;margin-top:2px}
+.own{display:inline-block;font-size:9px;font-family:var(--mono);background:var(--panel2);color:var(--gold);border:1px solid #4a4020;border-radius:4px;padding:0 4px;margin-left:5px;vertical-align:2px}
+.empty{padding:22px;text-align:center;color:var(--dim);font-size:14px}
+#nextBtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom));width:calc(min(480px,100%) - 28px);
+  z-index:6;border:none;border-radius:14px;padding:15px;font-family:var(--pix);font-size:12px;color:#06120b;background:var(--green);
+  box-shadow:0 6px 0 #1e8a54,0 10px 24px #0008;cursor:pointer}
+#nextBtn:active{transform:translateX(-50%) translateY(4px);box-shadow:0 2px 0 #1e8a54}
+#nextBtn:disabled{opacity:.4}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:6;background:#0a100c;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;border:none;color:var(--dim);padding:9px 0 11px;font-family:var(--sans);font-size:10.5px;font-weight:600;cursor:pointer;position:relative}
+nav button .i{display:block;font-size:19px;margin-bottom:2px;filter:grayscale(1);opacity:.7}
+nav button.on{color:var(--green)}
+nav button.on .i{filter:none;opacity:1}
+nav .dot{position:absolute;top:7px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:var(--red)}
+/* npcs */
+.npc{display:flex;gap:12px;align-items:center;padding:12px;border-top:1px solid var(--line);cursor:pointer}
+.npc:first-child{border-top:none}
+.av{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:26px;flex:none;border:2px solid #0006}
+.npc .who{flex:1;min-width:0}
+.npc .n{font-weight:700}
+.npc .r{font-size:12px;color:var(--dim)}
+.npc .q{font-size:13px;color:#cfe0d5;margin-top:4px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubble{background:var(--panel2);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:11px 13px;font-size:14.5px;line-height:1.45;margin:10px 0 12px}
+.bubble b{color:var(--gold)}
+.bubble b.up{color:var(--green)} .bubble b.down{color:var(--red)}
+.opt{display:block;width:100%;text-align:left;margin-top:8px}
+.opt small{display:block;font-weight:400;font-size:12px;opacity:.75;margin-top:2px}
+.prop{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.prop:first-of-type{border-top:none}
+.prop .em{font-size:26px;width:34px;text-align:center}
+.prop .pt{flex:1;min-width:0;font-size:13px}
+.prop .pt b{display:block;font-size:14px}
+.prop .btn{padding:9px 12px;font-size:13px}
+.hearts{font-size:15px;letter-spacing:2px}
+/* sheet */
+.scrim{position:fixed;inset:0;background:#000a;z-index:20;display:none;align-items:flex-end;justify-content:center}
+.scrim.show{display:flex}
+.sheet{width:100%;max-width:480px;background:var(--panel);border-radius:18px 18px 0 0;border:1px solid var(--line);border-bottom:none;padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+  max-height:92vh;overflow:auto;animation:up .22s ease-out}
+.modal{align-items:center}
+.modal .sheet{border-radius:18px;margin:auto 14px;border-bottom:1px solid var(--line)}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet .grab{width:40px;height:4px;background:var(--line);border-radius:4px;margin:-6px auto 12px}
+.sh-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sh-top .big{font-family:var(--mono);font-size:26px;font-weight:600}
+canvas{width:100%;height:170px;display:block;margin:10px 0 6px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.meta > div{background:var(--panel2);border-radius:8px;padding:7px 8px}
+.meta .k{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.meta .v{font-family:var(--mono);font-size:13px;margin-top:2px}
+.qty{display:flex;gap:8px;align-items:center;margin:12px 0 6px}
+.qty button{width:46px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:20px;cursor:pointer}
+.qty input{flex:1;height:46px;border-radius:10px;border:1px solid var(--line);background:#0b120e;color:var(--ink);font-family:var(--mono);font-size:20px;text-align:center;min-width:0}
+.chips{display:flex;gap:6px;margin-bottom:10px}
+.chips button{flex:1;padding:8px 0;border-radius:8px;border:1px solid var(--line);background:none;color:var(--dim);font-family:var(--mono);font-size:12px;cursor:pointer}
+.est{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center;margin-bottom:10px;min-height:16px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:none;border-radius:12px;padding:13px;font-family:var(--sans);font-weight:700;font-size:15px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.buy{background:var(--green);color:#06120b}
+.sell{background:var(--red);color:#1a0508}
+.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.gold{background:var(--gold);color:#241a02}
+.blue{background:var(--blue);color:#04121c}
+/* goals */
+.goal{display:flex;gap:12px;align-items:center;padding:12px;border-top:1px solid var(--line)}
+.goal:first-child{border-top:none}
+.goal .em{font-size:26px;width:38px;text-align:center}
+.goal .gt{flex:1;min-width:0}
+.goal .gn{font-weight:700}
+.goal .gd{font-size:12px;color:var(--dim);margin-top:2px}
+.goal .gc{font-family:var(--mono);font-size:12.5px;margin-top:4px}
+.goal.failed{opacity:.45}
+.goal.failed .gn{text-decoration:line-through}
+.goal .btn{padding:9px 12px;font-size:13px}
+.bar{height:6px;background:#0b120e;border-radius:6px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);border-radius:6px}
+.story{font-size:14px;line-height:1.5;color:#cfe0d5}
+.log{padding:10px 12px;border-top:1px solid var(--line);font-size:13px;line-height:1.35}
+.log:first-child{border-top:none}
+.log .d{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.log .o{font-family:var(--mono);font-size:12px;margin-top:3px}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  padding:10px 14px;border-radius:10px;z-index:40;font-size:13px;max-width:90%;box-shadow:0 8px 24px #000a;animation:up .2s}
+.small{font-size:12px;color:var(--dim);line-height:1.45}
+.pixel{font-family:var(--pix);font-size:13px;line-height:1.6;color:var(--gold);text-align:center;margin:6px 0 12px}
+ul.how{padding-left:18px;margin:8px 0;font-size:14px;line-height:1.5;color:#cfe0d5}
+.strikes{font-size:14px}
+
+/* ---- v3 additions ---- */
+.prot{display:block;width:100%;text-align:left;background:#10222e;border:1px solid #24506a;color:var(--ink);border-radius:10px;padding:9px 11px;font-size:13px;margin:-2px 0 10px;cursor:pointer;font-family:var(--sans)}
+.prot .pchg{float:right;color:var(--blue);font-weight:600}
+.logf{display:flex;gap:6px;margin-bottom:8px}
+.logf button{flex:1;padding:8px 0;border-radius:20px;border:1px solid var(--line);background:none;color:var(--dim);font-size:12px;font-weight:600;cursor:pointer}
+.logf button.on{background:var(--panel2);color:var(--ink);border-color:#3a5444}
+.lb{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;margin-right:6px;vertical-align:1px}
+.buyb{background:#123524;color:var(--green)} .sellb{background:#3a1419;color:var(--red)}
+.tnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 10px}
+.tnav button{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:20px;padding:6px 12px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer}
+.tnav span{font-size:11px;color:var(--dim)}
+.sheet.sl{animation:slL .22s ease-out} .sheet.sr{animation:slR .22s ease-out}
+@keyframes slL{from{transform:translateX(40px);opacity:.3}} @keyframes slR{from{transform:translateX(-40px);opacity:.3}}
+.rsv{font-size:10px;color:var(--blue);font-family:var(--mono);margin-top:1px;min-height:0}
+.mcard{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid #2f5a42;border-radius:12px;padding:10px 12px;margin-top:8px}
+.mbody{flex:1;min-width:0}
+.mt{font-weight:700;font-size:14px;margin-bottom:5px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.mchip{border-radius:20px;padding:5px 10px;font-size:12px;font-family:var(--mono);cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+.mchip.cheap b{color:var(--green)} .mchip.pricey b{color:var(--red)}
+.mbtn{width:100%;padding:9px;font-size:13px;margin-top:4px}
+.mtip{font-size:12.5px;background:#221f12;border:1px solid #4a4020;border-radius:8px;padding:7px 9px;margin-top:4px;line-height:1.4}
+.rep-row{padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.rep-row:first-child{border-top:none}
+.rr1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.rr2{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:4px}
+.rr2 b{font-family:var(--mono);color:var(--ink)}
+.rr2 b.up{color:var(--green)}.rr2 b.down{color:var(--red)}
+.lotsell{display:flex;gap:6px;margin:6px 0 4px}
+.lotsell input{flex:1;min-width:0;height:38px;border-radius:8px;border:1px solid var(--line);background:#0b120e;color:var(--ink);font-family:var(--mono);font-size:15px;text-align:center}
+.lotsell .btn{padding:8px 12px;font-size:13px}
+#olot{flex:1;height:40px;border-radius:10px;border:1px solid var(--line);background:#0b120e;color:var(--ink);font-family:var(--sans);font-size:13px;padding:0 8px}
+.meta .tap{cursor:pointer;border:1px solid #4a4020;background:#221f12}
+.meta .tap .k{color:var(--gold)}
+.tapnote{font-size:9px;color:var(--gold);margin-top:2px}
+.lot{padding:10px 0;border-top:1px solid var(--line)}
+.lot:first-child{border-top:none}
+.lot.gone{opacity:.45}
+.lot .lt{font-size:12px;color:var(--dim)}
+.lot .lt b{color:var(--ink)}
+.lot .via{float:right;font-size:10px;font-family:var(--mono);border:1px solid var(--line);border-radius:10px;padding:1px 6px}
+.lot .lr{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;margin:4px 0 2px}
+.about{background:none;border:1px solid var(--line);color:var(--blue);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;margin-top:6px;cursor:pointer;font-family:var(--sans)}
+.av.big{width:64px;height:64px;font-size:36px}
+.story-who{display:flex;gap:14px;align-items:center;margin:6px 0 4px}
+.story-text{font-size:16px;line-height:1.55;min-height:120px}
+.dots{display:flex;gap:6px;justify-content:center;margin:2px 0 14px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--gold)}
+#tut{position:fixed;inset:0;z-index:60}
+.tut-hole{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.8);border:2px solid var(--gold);pointer-events:none;transition:all .25s}
+.tut-card{position:fixed;left:12px;right:12px;max-width:456px;margin:0 auto;background:var(--panel);border:1.5px solid var(--gold);border-radius:14px;padding:14px;box-shadow:0 12px 30px #000c;animation:up .2s}
+.tut-step{font-family:var(--pix);font-size:9px;color:var(--gold);margin-bottom:8px}
+.tut-text{font-size:14.5px;line-height:1.5}
+.tut-btns{display:flex;align-items:center;gap:8px;margin-top:12px}
+.tut-btns .btn{padding:10px 16px;font-size:14px}
+.tut-btns .lnk{background:none;border:none;color:var(--dim);font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#0b120e;border:1px solid var(--line);border-radius:10px;padding:3px;margin:12px 0 10px}
+.seg button{border:none;background:none;color:var(--dim);padding:9px 0;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--panel2);color:var(--ink)}
+.otypes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.otypes button{flex:1 1 30%;padding:8px 4px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--dim);font-size:12px;font-weight:600;cursor:pointer}
+.otypes button.buy.on{background:#123524;color:var(--green);border-color:#1e8a54}
+.otypes button.sell.on{background:#3a1419;color:var(--red);border-color:#8a2a35}
+.ord{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.ord:first-child{border-top:none}
+.ord .ot{flex:1}
+.ord .btn{padding:7px 10px;font-size:12px}
+.art-h{font-family:Georgia,serif;font-size:21px;font-weight:700;line-height:1.2;margin-bottom:8px}
+.art-b{font-family:Georgia,serif;font-size:15.5px;line-height:1.5;color:#2c2618}
+.brk,.headline{cursor:pointer}
+#ctrl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom));width:calc(min(480px,100%) - 28px);z-index:6}
+#ffBtn{flex:none;width:74px;border:none;border-radius:14px;font-size:22px;color:#04121c;background:var(--blue);box-shadow:0 6px 0 #2b6f99,0 10px 24px #0008;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+#ffBtn small{font-family:var(--pix);font-size:8px;margin-top:4px}
+#ffBtn:active{transform:translateY(4px);box-shadow:0 2px 0 #2b6f99}
+#openBtn{flex:1;width:100%;border:none;border-radius:14px;padding:15px;font-family:var(--pix);font-size:12px;color:#06120b;background:var(--green);box-shadow:0 6px 0 #1e8a54,0 10px 24px #0008;cursor:pointer}
+#openBtn:active{transform:translateY(4px);box-shadow:0 2px 0 #1e8a54}
+#openBtn:disabled{opacity:.4}
+#live{display:flex;gap:8px;align-items:stretch;background:#0a100c;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:0 10px 24px #000a}
+#live .clock{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 6px}
+#clk{font-family:var(--pix);font-size:13px;color:var(--green)}
+#live.paused #clk{color:var(--gold)}
+.cbar{height:5px;background:var(--panel2);border-radius:5px;margin-top:7px;overflow:hidden}
+.cbar i{display:block;height:100%;background:var(--green);width:0}
+#live button{min-width:48px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;font-size:16px;font-family:var(--mono);font-weight:600;cursor:pointer}
+#live #pauseBtn{background:var(--gold);color:#241a02;border:none;font-size:18px}
+.race{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-top:8px;cursor:pointer}
+.race .me,.race .vic{font-family:var(--mono);font-size:14px;font-weight:600}
+.race .vic{text-align:right}
+.race .lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-family:var(--sans);font-weight:500}
+.race .vs{font-family:var(--pix);font-size:9px;color:var(--dim)}
+.brk{background:#2e1418;border:1px solid #6a2430;border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer;animation:flash .6s ease-out}
+.brk .h{font-family:var(--mono);font-size:10px;color:var(--red);font-weight:600;letter-spacing:.06em}
+.brk .tx{font-size:14px;font-weight:600;margin-top:3px;line-height:1.3}
+.brk .mv{font-family:var(--mono);font-size:12px;margin-top:3px}
+@keyframes flash{0%{background:#7a1f2c}100%{background:#2e1418}}
+.closed-note{font-family:var(--mono);font-size:11px;color:#5c5340;margin-top:3px}
+.evt-title{font-family:var(--pix);font-size:11px;color:var(--gold);line-height:1.6;margin:12px 0 2px}
+.confetti{position:fixed;top:-20px;z-index:50;pointer-events:none;font-size:20px;animation:fall 1.8s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.6}}
+.tclosed{font-size:12px;color:var(--gold);text-align:center;margin:4px 0 8px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><h1>TICKER TYCOON</h1><div class="day" id="dayLbl"></div></div>
+    <div class="stats">
+      <div class="stat"><div class="k" id="cashK">Cash</div><div class="v" id="cashLbl"></div><div class="rsv" id="cashRsv"></div></div>
+      <div class="stat"><div class="k">Net worth</div><div class="v" id="nwLbl"></div></div>
+      <div class="stat" style="text-align:center"><div class="k">Strikes</div><div class="v strikes" id="strLbl"></div></div>
+    </div>
+    <div class="ticker"><span class="t" id="tick"></span></div>
+  </header>
+  <main id="view"></main>
+  <div id="ctrl">
+    <div style="display:flex;gap:8px"><button id="openBtn">🔔 OPEN THE MARKET</button><button id="ffBtn" aria-label="Fast-forward to the end of the week">⏩<small>WEEK</small></button></div>
+    <div id="live" style="display:none">
+      <div class="clock"><span id="clk">9:30 AM</span><div class="cbar"><i id="cprog"></i></div></div>
+      <button id="pauseBtn" aria-label="Pause">⏸</button>
+      <button id="speedBtn" aria-label="Speed">1×</button>
+      <button id="skipBtn" aria-label="Skip to close">⏭</button>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-tab="market" class="on"><span class="i">📈</span>Market</button>
+    <button data-tab="portfolio"><span class="i">💼</span>Money</button>
+    <button data-tab="people"><span class="i">👥</span>People</button>
+    <button data-tab="goals"><span class="i">🏆</span>Goals</button>
+    <button data-tab="news"><span class="i">📰</span>Log</button>
+  </nav>
+</div>
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+
+<script>
+// ================= DATA =================
+const COMPANIES = [
+  ['NOVA','Novatek Systems','Tech',42,0.0179],
+  ['BYTE','Bytewave','Tech',18,0.0257],
+  ['PTRX','Petrolux Energy','Energy',55,0.0137],
+  ['SOLR','Sunfield Solar','Energy',9,0.0315],
+  ['GRUB','GrubHaus Foods','Food',31,0.01],
+  ['CRNR','Cornerstone Farms','Food',22,0.0126],
+  ['MEDX','Medixa Pharma','Health',64,0.0215],
+  ['VITA','Vitacore Labs','Health',12,0.0294],
+  ['ZOOM','Zoomline Motors','Auto',38,0.0168],
+  ['VOLT','Voltcar','Auto',6,0.0357],
+  ['BNKR','Bankrest Financial','Finance',47,0.0116],
+  ['GLDN','Goldenreach Mining','Mining',15,0.0215],
+];
+const NPCS = {
+  marty:   {name:'Marty Kessler', role:'Stockbroker',           em:'🧔', bg:'#3b6b4f'},
+  delia:   {name:'Delia Park',    role:'Loan officer, Bankrest', em:'👩‍💼', bg:'#3d5a80'},
+  ray:     {name:'Ray Alvarez',   role:'Real estate agent',      em:'🤠', bg:'#8a5a2b'},
+  whitlock:{name:'Mr. Whitlock',  role:'Aunt Edna’s lawyer',     em:'👴', bg:'#5b4a6e'},
+  jordan:  {name:'Jordan',        role:'Your partner',           em:'💞', bg:'#8a3b5a'},
+  victor:  {name:'Cousin Victor', role:'Your rival for the inheritance', em:'🦹', bg:'#6b2b2b'},
+  dev:     {name:'Dev',           role:'Your old college roommate', em:'🧑‍💻', bg:'#2b5a6b'},
+};
+const GOALS = [
+  {id:'suit',  type:'buy', em:'👔', name:'Sharp Suit',        cost:3000,     due:14,   upkeep:0,     by:'whitlock', desc:'“Edna insisted you dress the part.”'},
+  {id:'nw150', type:'nw',  em:'📈', name:'Grow to $125K',     target:125000, due:60,   by:'whitlock', desc:'Prove you can grow her gift by 25%.'},
+  {id:'gift',  type:'buy', em:'💐', name:'Anniversary Gift',  cost:10000,    due:90,   upkeep:0,     by:'jordan',   desc:'“Our anniversary is coming up… just saying.”'},
+  {id:'home',  type:'home',em:'🏠', name:'Own a Home',        due:180,  by:'ray',      desc:'Buy any property from Ray. Ends your rent.'},
+  {id:'car',   type:'buy', em:'🚗', name:'New Car',           cost:30000,    due:240,  upkeep:300,   by:'jordan',   desc:'“The bus is fine. Said no one ever.”'},
+  {id:'nw500', type:'nw',  em:'💵', name:'Quarter Million',   target:250000, due:365,  by:'whitlock', desc:'Net worth of $250K by the end of year one.'},
+  {id:'ring',  type:'buy', em:'💍', name:'Engagement Ring',   cost:40000,    due:450,  upkeep:0,     by:'jordan',   desc:'Time to pop the question.'},
+  {id:'sports',type:'buy', em:'🏎️', name:'Sports Car',        cost:120000,   due:540,  upkeep:1500,  by:'whitlock', desc:'“Edna drove a roadster until she was 90.”'},
+  {id:'nw2m',  type:'nw',  em:'💰', name:'One Million',       target:1000000,due:730,  by:'whitlock', desc:'Net worth of $1M by the end of year two.'},
+  {id:'lake',  type:'prop',prop:'lake', em:'🏡', name:'The Lake House', due:820, by:'ray', desc:'Buy the Lake House from Ray — Edna’s old summer place.'},
+  {id:'yacht', type:'buy', em:'⛵', name:'Yacht',             cost:400000,   due:900,  upkeep:3500, by:'jordan',   desc:'“Imagine our honeymoon on the water.”'},
+  {id:'nw8m',  type:'nw',  em:'🏦', name:'Two Million',       target:2000000,due:1000, by:'whitlock', desc:'Net worth of $2M.'},
+  {id:'island',type:'buy', em:'🏝️', name:'Private Island',    cost:5000000,  due:1094, upkeep:0,     by:'whitlock', desc:'Edna’s final condition. Buy it debt-free, before Victor does.', final:true},
+];
+const PROPS = [
+  {id:'bungalow',em:'🏠', name:'Maple St. Bungalow',  price:250000},
+  {id:'condo',   em:'🏢', name:'Riverside Condo',     price:450000},
+  {id:'house',   em:'🏘️', name:'Hillcrest Family Home',price:800000},
+  {id:'lake',    em:'🏡', name:'The Lake House',      price:900000},
+  {id:'estate',  em:'🏰', name:'Bayview Estate',      price:2500000},
+];
+const START_CASH=100000, RENT=1800, LIVING=1000, COMMISSION=10, MAX_STRIKES=3;
+// ================= TRADING CALENDAR (NYSE-style) =================
+// Day 0 is Monday, January 4 of "Year 1" (laid out like 2027). Only weekdays that aren't market holidays are trading days.
+const CAL_START = Date.UTC(2027,0,4), YEAR0=2027, MS_DAY=86400000;
+const ymd = t => new Date(t).toISOString().slice(0,10);
+function nthWeekday(y,m,wd,n){ const d=new Date(Date.UTC(y,m,1)); const off=(wd-d.getUTCDay()+7)%7; return Date.UTC(y,m,1+off+7*(n-1)); }
+function lastWeekday(y,m,wd){ const d=new Date(Date.UTC(y,m+1,0)); const off=(d.getUTCDay()-wd+7)%7; return Date.UTC(y,m+1,-off); }
+function observed(t){ const wd=new Date(t).getUTCDay(); return wd===6?t-MS_DAY:wd===0?t+MS_DAY:t; }
+function easter(y){ const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return Date.UTC(y,mo-1,da); }
+function holidaysFor(y){
+  const H={};
+  const nyd=Date.UTC(y,0,1); if(new Date(nyd).getUTCDay()!==6) H[ymd(observed(nyd))]='New Year’s Day';   // NYSE skips a Saturday New Year's
+  H[ymd(nthWeekday(y,0,1,3))]='Martin Luther King Jr. Day';
+  H[ymd(nthWeekday(y,1,1,3))]='Presidents’ Day';
+  H[ymd(easter(y)-2*MS_DAY)]='Good Friday';
+  H[ymd(lastWeekday(y,4,1))]='Memorial Day';
+  H[ymd(observed(Date.UTC(y,5,19)))]='Juneteenth';
+  H[ymd(observed(Date.UTC(y,6,4)))]='Independence Day';
+  H[ymd(nthWeekday(y,8,1,1))]='Labor Day';
+  H[ymd(nthWeekday(y,10,4,4))]='Thanksgiving';
+  H[ymd(observed(Date.UTC(y,11,25)))]='Christmas';
+  return H;
+}
+const HOLIDAYS = Object.assign({}, ...[0,1,2,3].map(i=>holidaysFor(YEAR0+i)));
+const CAL_END = Date.UTC(YEAR0+3,0,4);           // three years after the start
+const TRADING_DAYS=[];                            // timestamp of every trading day
+for(let t=CAL_START; t<CAL_END; t+=MS_DAY){ const wd=new Date(t).getUTCDay(); if(wd>0&&wd<6&&!HOLIDAYS[ymd(t)]) TRADING_DAYS.push(t); }
+const DEADLINE = TRADING_DAYS.length-1;
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const dateOf = d => new Date(TRADING_DAYS[Math.min(Math.max(0,d),TRADING_DAYS.length-1)]);
+const yearOf = d => dateOf(d).getUTCFullYear()-YEAR0+1;
+const fmtDate = (d,withWd=true) => { const x=dateOf(d); return `${withWd?WD[x.getUTCDay()]+', ':''}${MONTHS[x.getUTCMonth()]} ${x.getUTCDate()}`; };
+const fmtDateY = (d,withWd=true) => `${fmtDate(d,withWd)}, Year ${yearOf(d)}`;
+// trading day on or before "start + n calendar days"
+function tradingIndexByCal(n){ const t=CAL_START+n*MS_DAY; let i=0; while(i+1<TRADING_DAYS.length && TRADING_DAYS[i+1]<=t) i++; return i; }
+// holidays/weekend the market skipped between two trading days
+function closedBetween(a,b){ const out=[]; for(let t=TRADING_DAYS[a]+MS_DAY; t<TRADING_DAYS[b]; t+=MS_DAY){ if(HOLIDAYS[ymd(t)]) out.push(`${WD[new Date(t).getUTCDay()]}, ${MONTHS[new Date(t).getUTCMonth()]} ${new Date(t).getUTCDate()} for ${HOLIDAYS[ymd(t)]}`); } return out; }
+const newMonth = d => d>0 && dateOf(d).getUTCMonth()!==dateOf(d-1).getUTCMonth();
+const newWeek  = d => d>0 && dateOf(d).getUTCDay() < dateOf(d-1).getUTCDay();
+const tdays = n => `${n} trading day${n===1?'':'s'}`;
+// goal deadlines are written in calendar days from the start; convert them to trading days
+GOALS.forEach(g=>{ g.dueCal=g.due; g.due=tradingIndexByCal(g.due); });
+
+const LOAN_RATE=.0125, CASH_DEBT_RATE=.02, DOWN=.20, CLOSING=.02, MORT_RATE=.005, MORT_PAY=.0065;
+const TICKS=78, MID=39, TICK_MS=900, ISLAND=5000000;
+
+const SECTOR_NEWS = {
+  Tech:   {pos:['Chip shortage eases; tech makers expect a boom','Office software spending surges nationwide'], neg:['New data-privacy law threatens tech profits','Tech hiring freeze spreads across the valley']},
+  Energy: {pos:['Fuel prices spike on supply worries','Cold snap sends energy demand soaring'], neg:['Mild winter cuts energy demand','Pipeline glut pushes fuel prices lower']},
+  Food:   {pos:['Record harvest lowers costs for food makers','Restaurant traffic hits a 10-year high'], neg:['Drought threatens this season’s crops','Grain prices jump, squeezing food makers']},
+  Health: {pos:['Regulators fast-track new drug approvals','Aging population drives health spending up'], neg:['Lawmakers propose drug price caps','Clinic visits fall as insurance costs rise']},
+  Auto:   {pos:['Car sales hit a five-year high','Gas prices dip; buyers flock to showrooms'], neg:['Steel costs jump, squeezing automakers','Car loans get harder to find']},
+  Finance:{pos:['Central bank hints at higher rates — good for lenders','Merger boom fills bank fee coffers'], neg:['Loan defaults rise sharply','Regulators order banks to hold more cash']},
+  Mining: {pos:['Gold rallies as investors seek safety','New infrastructure bill lifts metal demand'], neg:['Metal prices slump on weak demand','Mine strike talks break down']},
+};
+const CO_POS = ['{n} beats earnings forecasts','{n} lands a major government contract','{n} unveils a breakthrough product','Analysts upgrade {n} to “Buy”','{n} announces share buyback','{n} expands into overseas markets'];
+const CO_NEG = ['{n} misses quarterly targets','{n} CEO resigns unexpectedly','Product recall hits {n}','{n} sued by former partners','Analysts downgrade {n} to “Sell”','{n} warns of slower growth'];
+const RUMOR_POS = ['{n} said to be in buyout talks','Insiders whisper {n} has a hit product coming'];
+const RUMOR_NEG = ['Accounting questions swirl around {n}','Talk of layoffs at {n}'];
+const MKT_POS = ['Jobs report blows past expectations','Central bank cuts interest rates','Consumer confidence hits a record'];
+const MKT_NEG = ['Recession fears grip the Exchange','Inflation runs hotter than expected','Trade dispute rattles investors'];
+const BREAK_POS = ['{n} confirms takeover offer at a big premium','{n} wins approval for its flagship product','{n} raises full-year forecast','Famous investor reveals huge stake in {n}'];
+const BREAK_NEG = ['Trading halted briefly in {n} after fraud report','{n} plant fire halts production','{n} loses its biggest customer','Regulators raid {n} headquarters'];
+const FLASH = [{t:'Flash crash! Computer-trading glitch rocks the Exchange',s:-1},{t:'Surprise mid-day rate cut sends stocks flying',s:1},{t:'Rumor of a bank failure sparks a sell-off',s:-1}];
+const VICTOR_TAUNTS = {
+  ahead:['Still behind me, cousin? Aunt Edna always said I was the clever one.','I made more before lunch than you made all week.','Enjoy the bus. I’ll wave from the island.'],
+  behind:['Beginner’s luck. It runs out.','Don’t get comfortable. I’m just warming up.','Enjoy it while it lasts, cousin.'],
+};
+
+// ---- article copy: one detail sentence per headline, then a tone line ----
+const DETAILS = {
+  '{n} beats earnings forecasts':'{n} earned ${a} a share last quarter, well ahead of the ${b} analysts had penciled in.',
+  '{n} lands a major government contract':'The five-year deal is worth about ${m} million — a big prize for a company the size of {n}.',
+  '{n} unveils a breakthrough product':'{n} showed off its new flagship to a packed room yesterday, and early reviews from testers are glowing.',
+  'Analysts upgrade {n} to “Buy”':'Analysts at Harmon & Pike raised their target on {n} to ${pt}, saying the market has overlooked its growth.',
+  '{n} announces share buyback':'The company will spend ${m} million buying back its own stock — usually a sign management thinks shares are cheap.',
+  '{n} expands into overseas markets':'{n} plans to open offices in six new countries this year, betting that faster growth lies abroad.',
+  '{n} misses quarterly targets':'{n} earned just ${b} a share last quarter, short of the ${a} Wall Street had expected.',
+  '{n} CEO resigns unexpectedly':'The chief executive left “to pursue other interests,” effective immediately. The board has not named a replacement.',
+  'Product recall hits {n}':'{n} is pulling thousands of units off shelves over a safety defect, and the bill could run to ${m} million.',
+  '{n} sued by former partners':'Two former partners say {n} broke a supply agreement and are seeking ${m} million in damages.',
+  'Analysts downgrade {n} to “Sell”':'Harmon & Pike cut its target on {n} to ${pt}, warning that competition is eating into profits.',
+  '{n} warns of slower growth':'Executives told investors that sales will grow more slowly next year as demand cools.',
+  '{n} said to be in buyout talks':'People close to the matter say a larger rival has approached {n} about a takeover at a hefty premium.',
+  'Insiders whisper {n} has a hit product coming':'Employees at {n} are said to be buzzing about a secret project due out within weeks.',
+  'Accounting questions swirl around {n}':'Short sellers claim {n} has been booking sales before customers actually pay.',
+  'Talk of layoffs at {n}':'Several {n} employees say managers have been told to prepare for deep job cuts.',
+  'Anonymous tipster claims {n} is hiding big losses':'An anonymous letter sent to several newspapers accuses {n} of burying losses in a side company.',
+  'Jobs report blows past expectations':'Employers added far more jobs last month than economists forecast, and wages are rising too.',
+  'Central bank cuts interest rates':'Cheaper borrowing tends to help companies grow, and investors had been hoping for exactly this.',
+  'Consumer confidence hits a record':'Shoppers say they feel better about their finances than at any time in the survey’s history.',
+  'Recession fears grip the Exchange':'A string of weak factory and housing numbers has economists warning that a slowdown may be coming.',
+  'Inflation runs hotter than expected':'Prices rose faster than forecast last month, raising fears the central bank will hike rates.',
+  'Trade dispute rattles investors':'New tariffs announced overnight threaten to raise costs for companies that buy parts abroad.',
+  'Chip shortage eases; tech makers expect a boom':'Factories are finally catching up on orders, which should let tech companies ship more products.',
+  'Office software spending surges nationwide':'A survey of businesses shows tech budgets rising at the fastest pace in years.',
+  'New data-privacy law threatens tech profits':'The proposed rules would limit how tech firms collect and sell customer data.',
+  'Tech hiring freeze spreads across the valley':'Several big employers have stopped hiring, a sign they expect business to slow.',
+  'Fuel prices spike on supply worries':'A key supplier cut production, sending prices up — good news for energy producers.',
+  'Cold snap sends energy demand soaring':'Forecasters expect weeks of freezing weather, and heating bills are climbing.',
+  'Mild winter cuts energy demand':'Warm weather has left fuel tanks full and prices sagging.',
+  'Pipeline glut pushes fuel prices lower':'New pipelines are delivering more supply than the market can use.',
+  'Record harvest lowers costs for food makers':'Bumper crops mean cheaper ingredients for companies that make and sell food.',
+  'Restaurant traffic hits a 10-year high':'Diners are eating out more often, and food suppliers are struggling to keep up.',
+  'Drought threatens this season’s crops':'Farmers in the grain belt have seen almost no rain for six weeks.',
+  'Grain prices jump, squeezing food makers':'Higher ingredient costs could eat into profits at food companies.',
+  'Regulators fast-track new drug approvals':'A new rule could cut years off the time it takes to bring medicines to market.',
+  'Aging population drives health spending up':'A government report projects health spending to rise sharply for a decade.',
+  'Lawmakers propose drug price caps':'The bill would limit what drug companies can charge for dozens of popular medicines.',
+  'Clinic visits fall as insurance costs rise':'Patients are putting off appointments as their out-of-pocket costs climb.',
+  'Car sales hit a five-year high':'Dealers report packed showrooms and short supplies of popular models.',
+  'Gas prices dip; buyers flock to showrooms':'Cheaper fuel has drivers shopping for bigger, pricier vehicles.',
+  'Steel costs jump, squeezing automakers':'Automakers face higher prices for their most important raw material.',
+  'Car loans get harder to find':'Banks are tightening lending rules, leaving fewer buyers able to finance a new car.',
+  'Central bank hints at higher rates — good for lenders':'Higher rates let banks earn more on the loans they make.',
+  'Merger boom fills bank fee coffers':'A wave of corporate deals means big advisory fees for the banks that arrange them.',
+  'Loan defaults rise sharply':'More borrowers are falling behind on payments, and banks may have to set aside cash for losses.',
+  'Regulators order banks to hold more cash':'The new rules mean banks will have less money to lend — and less to earn.',
+  'Gold rallies as investors seek safety':'Worried investors are piling into precious metals, lifting prices for miners.',
+  'New infrastructure bill lifts metal demand':'The spending plan calls for years of new roads and bridges, all needing metal.',
+  'Metal prices slump on weak demand':'Factories are buying less raw material as orders slow.',
+  'Mine strike talks break down':'Workers at several large mines say they will walk off the job next week.',
+  '{n} confirms takeover offer at a big premium':'{n} says it has received a buyout offer well above today’s share price and is considering it.',
+  '{n} wins approval for its flagship product':'Regulators signed off on {n}’s most important product moments ago, clearing the way for sales.',
+  '{n} raises full-year forecast':'{n} says business is so strong it now expects to earn far more this year than it planned.',
+  'Famous investor reveals huge stake in {n}':'A legendary investor disclosed a large position in {n}, calling it “the best bargain on the Exchange.”',
+  'Trading halted briefly in {n} after fraud report':'A short seller published a report accusing {n} of inflating sales. The company calls it “false and malicious.”',
+  '{n} plant fire halts production':'A fire at {n}’s largest facility has stopped production. No one was hurt, but repairs could take months.',
+  '{n} loses its biggest customer':'A major client says it will stop buying from {n} at the end of the quarter.',
+  'Regulators raid {n} headquarters':'Investigators carried boxes of documents out of {n}’s offices this morning.',
+  'Flash crash! Computer-trading glitch rocks the Exchange':'Automated trading programs went haywire, sending prices tumbling across the board in minutes.',
+  'Surprise mid-day rate cut sends stocks flying':'The central bank made an unscheduled cut, catching traders completely off guard.',
+  'Rumor of a bank failure sparks a sell-off':'Word spread on the trading floor that a regional bank is in trouble, and investors are dumping stocks.',
+};
+const TONE = {
+  sure:  {co:['The company confirmed the news in an official statement.','Analysts on the morning call called the numbers “rock solid.”','Executives backed it up with hard figures on a call with investors.'],
+          rumor:['Two separate sources confirmed the story to the Daily.','Documents seen by the Daily appear to back up the claim.'],
+          wide:['Economists say the trend looks set to last.','Most experts agree this is a big deal for the industry.'],
+          brk:['Officials confirmed the details within minutes.','Multiple outlets are reporting the same facts.']},
+  shaky: {co:['Some analysts warn the details are thinner than they look.','Skeptics note the company has made similar claims before.','One trader called the reaction “mostly hype.”'],
+          rumor:['The company declined to comment, and the story could not be confirmed.','The claims come from a single anonymous source.'],
+          wide:['Some economists think the effect will fade quickly.','Others say the news is already old by now.'],
+          brk:['Details are still sketchy and could change.','The company says the reports are “premature.”']},
+};
+function fillNews(tpl, s){
+  const a=rnd(.8,3.5), b=a*rnd(.6,.85);
+  return tpl.replace(/\{n\}/g, s?s.name:'').replace(/\{sec\}/g, s?s.sector.toLowerCase():'')
+    .replace('${m}', '$'+Math.round(rnd(40,900))).replace('${pt}', s?'$'+(s.price*rnd(1.1,1.5)).toFixed(0):'')
+    .replace('${a}', '$'+a.toFixed(2)).replace('${b}', '$'+b.toFixed(2))
+    .replace(/\$\$/g,'$');
+}
+// tone hints at whether the story will hold up: right about 2 times in 3
+function toneLine(kind, holds){
+  const sure = Math.random()<(holds?.84:.16);
+  const k = kind==='rumor'?'rumor':kind==='co'?'co':kind==='brk'?'brk':'wide';
+  return pick(TONE[sure?'sure':'shaky'][k]);
+}
+function writeArticle(it, tpl, s, kind){
+  const holds = it.real!==undefined ? Math.sign(it.real)===it.sign : it.holds;
+  it.blurb = fillNews(DETAILS[tpl]||'No further details were available at press time.', s) + ' ' + toneLine(kind||it.kind, holds);
+  return it;
+}
+
+// ================= UTILS =================
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
+const roundK = x => Math.round(x/1000)*1000;
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function money(n, compact){
+  const neg=n<0; n=Math.abs(n); let s;
+  if(compact && n>=1e6) s='$'+(n/1e6).toFixed(n>=1e7?1:2)+'M';
+  else if(compact && n>=1e4) s='$'+(n/1e3).toFixed(n>=1e5?0:1)+'K';
+  else s='$'+n.toLocaleString('en-US',{minimumFractionDigits:n<100?2:0,maximumFractionDigits:n<100?2:0});
+  return (neg?'-':'')+s;
+}
+const pct = x => (x>=0?'+':'')+(x*100).toFixed(1)+'%';
+const cls = x => x>=0?'up':'down';
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function clockStr(t){ const m=570+Math.round(t*390/TICKS), h=Math.floor(m/60), mm=String(m%60).padStart(2,'0'); return `${h>12?h-12:h}:${mm} ${h>=12?'PM':'AM'}`; }
+
+// ---- juice ----
+let AC;
+function sfx(type){
+  if(!S||!S.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const seq={bell:[[880,.14],[660,.14],[880,.3]],close:[[660,.14],[880,.14],[660,.3]],news:[[520,.07],[0,.04],[520,.07],[780,.14]],cash:[[1320,.05],[1760,.12]],goal:[[523,.1],[659,.1],[784,.1],[1047,.3]],bad:[[260,.18],[190,.32]],click:[[700,.03]]}[type];
+    let t0=AC.currentTime;
+    seq.forEach(([f,d])=>{ if(f){ const o=AC.createOscillator(), g=AC.createGain(); o.type='square'; o.frequency.value=f; g.gain.setValueAtTime(.05,t0); g.gain.exponentialRampToValueAtTime(.0005,t0+d); o.connect(g).connect(AC.destination); o.start(t0); o.stop(t0+d);} t0+=d; });
+  }catch(e){}
+}
+function buzz(ms){ try{ navigator.vibrate&&navigator.vibrate(ms); }catch(e){} }
+function confetti(){
+  const bits=['🎉','💵','✨','🪙','🎊','💰'];
+  for(let i=0;i<34;i++){ const d=document.createElement('div'); d.className='confetti'; d.textContent=pick(bits);
+    d.style.left=Math.random()*100+'vw'; d.style.animationDelay=(Math.random()*.5)+'s'; d.style.fontSize=(14+Math.random()*16)+'px';
+    document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
+}
+
+// ================= STATE =================
+let ffing=false;
+let tradeMode='now', orderType='obuy', orderLot='';
+let S, tab='market', sheetSym=null, sheetNpc=null, timer=null, paused=false, speed=1, skipping=false;
+
+function newGame(){
+  S = {
+    day:0, cash:START_CASH, mood:0, holdings:{}, log:[], goals:{}, strikes:0, loan:0, items:[],
+    props: PROPS.map(p=>({id:p.id,value:p.price,loan:0,pay:0,owned:false})),
+    hearts:70, readDay:-1, tipDay:-1, tip:null, read:null, dinnerDay:-99, intro:true, over:null, unread:{whitlock:true,victor:true},
+    cal:true, v7:true, v8:true, phase:'closed', t:0, breaking:[], breakQ:[], queue:[], pending:[], seen:{}, lastEvent:0, tipsBought:0, orders:[], martyBan:-1, goodwill:0, sound:true,
+    rival:{nw:START_CASH, lead:null}, dayStartNW:START_CASH,
+    stocks: COMPANIES.map(([sym,name,sector,p,vol])=>{
+      const hist=[]; let x=p*rnd(.85,1.1);
+      for(let i=0;i<40;i++){ x*=1+gauss()*vol*.8; x=Math.max(.5,x); hist.push(+x.toFixed(2)); }
+      return {v5:true,v6:true,v9:true,sym,name,sector,vol,price:hist[hist.length-1],prev:hist[hist.length-1],fair:p*rnd(.85,1.15),beta:(PROFILES[sym]?.beta||1)*rnd(.9,1.1),betaFixed:true,drift:rnd(.0008,.0016),hist,path:null};
+    }),
+  };
+  S.news=makeNews(); S.next=makeNews();
+  save();
+}
+function save(){ try{ localStorage.setItem('tickerTycoon3', JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const j=localStorage.getItem('tickerTycoon3'); if(j){ S=JSON.parse(j); return !!S.stocks; } }catch(e){} return false; }
+
+const stock = sym => S.stocks.find(s=>s.sym===sym);
+const propS = id => S.props.find(p=>p.id===id);
+const propD = id => PROPS.find(p=>p.id===id);
+const holdingsValue = () => Object.entries(S.holdings).reduce((t,[k,h])=>t+h.qty*stock(k).price,0);
+const equity = () => S.props.filter(p=>p.owned).reduce((t,p)=>t+p.value-p.loan,0);
+const netWorth = () => S.cash + holdingsValue() + equity() - S.loan;
+const ownsHome = () => S.props.some(p=>p.owned);
+const creditAvail = () => Math.max(0, Math.floor((netWorth()*.5 - S.loan)/1000)*1000);
+const prevClose = s => S.phase==='open' ? s.hist[s.hist.length-1] : s.hist[s.hist.length-2];
+const chg = s => s.price/prevClose(s)-1;
+const histNow = s => S.phase==='open' ? [...s.hist, s.price] : s.hist;
+const goalState = g => S.goals[g.id];
+const openGoals = () => GOALS.filter(g=>!goalState(g));
+const isOpen = () => S.phase==='open';
+function spend(a){ S.cash-=a; }
+function monthlyBreakdown(){
+  const items=[];
+  if(!ownsHome()) items.push(['Rent',RENT]);
+  items.push(['Living costs',LIVING]);
+  const up=GOALS.filter(g=>S.items.includes(g.id)).reduce((t,g)=>t+(g.upkeep||0),0); if(up) items.push(['Upkeep (car, boat…)',up]);
+  S.props.filter(p=>p.owned).forEach(p=>{ if(p.loan>0) items.push([propD(p.id).name+' mortgage',Math.round(Math.min(p.pay,p.loan*(1+MORT_RATE)))]); items.push([propD(p.id).name+' tax & upkeep',Math.round(p.value*.001)]); });
+  if(S.loan>0) items.push(['Bank loan interest',Math.round(S.loan*LOAN_RATE)]);
+  if(S.cash<0) items.push(['Overdraft interest',Math.round(-S.cash*CASH_DEBT_RATE)]);
+  return items;
+}
+const monthlyBills = () => monthlyBreakdown().reduce((t,[,v])=>t+v,0);
+function addLog(text,kind,out,good,who){ S.log.unshift({day:S.day,text,kind,out:out||'',good:!!good,who}); if(S.log.length>500) S.log.length=500; }
+
+// ================= NEWS =================
+function finishNews(it){
+  it.real = Math.random()<it.rel ? it.sign*it.mag*rnd(.7,1.4) : -it.sign*it.mag*(it.kind==='rumor'?rnd(.2,.6):rnd(.4,.9));
+  it.pre  = it.sign*it.mag*(it.kind==='rumor'?rnd(.3,.55):rnd(.45,.8));
+  if(it.tpl) writeArticle(it, it.tpl, it.sym?stock(it.sym):null);
+  return it;
+}
+function makeNews(){
+  const out=[]; const n=Math.random()<.25?2:(Math.random()<.6?3:4); const used=new Set();
+  const fresh=()=>{ let s; do{ s=pick(S.stocks);}while(used.has(s.sym)); used.add(s.sym); return s; };
+  for(let i=0;i<n;i++){
+    const r=Math.random(), sign=Math.random()<.5?1:-1; let it;
+    if(r<.48){ const s=fresh(), tp=pick(sign>0?CO_POS:CO_NEG); it={kind:'co',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.035,.12),rel:.72}; }
+    else if(r<.64){ const s=fresh(), tp=pick(sign>0?RUMOR_POS:RUMOR_NEG); it={kind:'rumor',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.05,.14),rel:.55}; }
+    else if(r<.88){ const sec=pick(Object.keys(SECTOR_NEWS)), tp=pick(sign>0?SECTOR_NEWS[sec].pos:SECTOR_NEWS[sec].neg); it={kind:'sector',sector:sec,tpl:tp,text:tp,sign,mag:rnd(.02,.065),rel:.7}; }
+    else { const tp=pick(sign>0?MKT_POS:MKT_NEG); it={kind:'mkt',tpl:tp,text:tp,sign,mag:rnd(.015,.045),rel:.7}; }
+    out.push(finishNews(it));
+  }
+  return out;
+}
+const hits = (n,s) => (n.sym===s.sym) || (n.kind==='sector'&&n.sector===s.sector) || n.kind==='mkt';
+const weight = (n,s) => n.kind==='mkt'? s.beta : 1;
+function newsTag(n){
+  if(n.kind==='co') return `<span class="tag">${n.sym}</span>`;
+  if(n.kind==='rumor') return `<span class="tag rumor">RUMOR · ${n.sym}</span>`;
+  if(n.kind==='sector') return `<span class="tag">${n.sector.toUpperCase()}</span>`;
+  return `<span class="tag mkt">MARKET</span>`;
+}
+
+// ================= THE TRADING DAY =================
+function buildPath(s, target){
+  const inc=[]; let cum=0;
+  for(let i=1;i<=TICKS;i++){ cum+=gauss()*s.vol*.6/Math.sqrt(TICKS); inc.push(cum); }
+  const lt=Math.log(target/s.price), end=inc[TICKS-1];
+  s.path=[s.price];
+  for(let i=1;i<=TICKS;i++) s.path.push(Math.max(.5,+(s.price*Math.exp(inc[i-1]-end*i/TICKS+lt*i/TICKS)).toFixed(2)));
+}
+function makeBreak(){
+  if(Math.random()<.14){ const f=pick(FLASH), b={kind:'mkt',text:f.t,sign:f.s,mag:rnd(.035,.07),rel:.5}; b.holds=Math.random()<b.rel; return writeArticle(b,f.t,null,'brk'); }
+  const s=pick(S.stocks), sign=Math.random()<.5?1:-1;
+  const tp=pick(sign>0?BREAK_POS:BREAK_NEG), b={kind:'co',sym:s.sym,text:fillNews(tp,s),sign,mag:rnd(.04,.1),rel:.65}; b.holds=Math.random()<b.rel; return writeArticle(b,tp,s,'brk');
+}
+function openMarket(){
+  if(isOpen()||S.over) return;
+  if(S.queue.length){ showQueue(); return; }
+  filledSyms.clear();
+  S.dayStartNW=netWorth(); S.dayTrades=[]; S.dayStartQty={}; Object.entries(S.holdings).forEach(([k,v])=>S.dayStartQty[k]=v.qty);
+  if(Math.random()<.035) S.mood=clamp(gauss()*.7,-1,1);
+  S.stocks.forEach(s=>s.prev=s.price);
+  // opening gap: part of each morning story is priced in at the bell
+  S.news.forEach(n=>{ n.moves={}; S.stocks.forEach(s=>{ if(!hits(n,s)) return; const e=n.pre*weight(n,s)*rnd(.7,1.3); s.price=Math.max(.5,+(s.price*(1+e)).toFixed(2)); n.moves[s.sym]=e; }); });
+  // where each stock will close (before any breaking news)
+  S.stocks.forEach(s=>{
+    let r = s.drift + S.mood*.005 + gauss()*s.vol*.8 - 0.02*Math.log(s.price/s.fair);
+    S.news.forEach(n=>{ if(!hits(n,s)) return; const w=weight(n,s); r+=(n.real-n.pre)*w; s.fair*=1+n.real*w*.8; });
+    s.fair=Math.max(1,s.fair*(1+s.drift)*Math.exp(gauss()*s.vol*.1));
+    buildPath(s, Math.max(.5,s.price*Math.exp(clamp(r,-.45,.45))));
+  });
+  const k=Math.random()<.55?1:(Math.random()<.35?2:0);
+  S.breakQ=[]; for(let i=0;i<k;i++) S.breakQ.push({t:Math.floor(rnd(4,MID-1)),b:makeBreak()});
+  S.breaking=[]; S.t=0; S.phase='open'; paused=false; S.breakPaused=false;
+  runOrders(true);
+  save(); sfx('bell'); buzz(40);
+}
+function fireBreak(item){
+  const b=item.b, t=S.t, moves={};
+  S.stocks.forEach(s=>{
+    if(!(b.kind==='mkt'||b.sym===s.sym)) return;
+    const w=b.kind==='mkt'?s.beta:1, e=b.sign*b.mag*w*rnd(.8,1.2);
+    const cont=((b.holds!==undefined?b.holds:Math.random()<b.rel) ? b.sign*b.mag*rnd(0,.5) : -b.sign*b.mag*rnd(.3,.8))*w;
+    for(let k=t;k<=TICKS;k++) s.path[k]=Math.max(.5,+(s.path[k]*(1+e)*(1+cont*(k-t)/(TICKS-t||1))).toFixed(2));
+    s.price=s.path[t]; moves[s.sym]=e;
+  });
+  const mv=b.sym?moves[b.sym]:Object.values(moves).reduce((a,c)=>a+c,0)/Object.keys(moves).length;
+  S.breaking.unshift({time:clockStr(t),text:b.text,sym:b.sym,move:mv,blurb:b.blurb});
+  addLog(`BREAKING ${clockStr(t)}: ${b.text}`,'break',`${b.sym||'Market'} ${pct(mv)}`,mv>=0);
+  if(b.sym && S.holdings[b.sym]) S.ffHeldBreak=b.sym;
+  if(!ffing){ toast(`🚨 ${b.text}`); sfx('news'); buzz([60,40,60]); }
+}
+function startTimer(){ clearInterval(timer); timer=setInterval(tick, TICK_MS/speed); }
+function stopTimer(){ clearInterval(timer); timer=null; }
+function stepTick(){
+  S.t++;
+  S.stocks.forEach(s=>s.price=s.path[S.t]);
+  S.breakQ.filter(q=>q.t===S.t).forEach(fireBreak);
+  runOrders(false);
+}
+function tick(){
+  if(paused||!isOpen()) return;
+  stepTick();
+  if(S.t>=TICKS){ closeMarket(); return; }
+  if(S.t%8===0) save();
+  liveRender();
+  if(filledSyms.size){ if(sheetSym&&filledSyms.has(sheetSym)) openTrade(sheetSym); filledSyms.clear(); save(); }
+}
+function skipToClose(){ if(!isOpen()) return; skipping=true; while(S.t<TICKS) stepTick(); skipping=false; closeMarket(); }
+// ---- the three stops of a trading day: pre-market -> midday -> closing bell ----
+function goMidday(){
+  if(isOpen()||S.over) return;
+  if(S.queue.length){ showQueue(); return; }
+  openMarket(); while(S.t<MID) stepTick(); paused=true;
+  filledSyms.clear(); save(); render(); window.scrollTo(0,0);
+  if(sheetSym) openTrade(sheetSym);
+}
+function fastForward(){
+  if(isOpen()||S.over) return;
+  if(S.queue.length){ showQueue(); return; }
+  closeSheet();
+  const start={day:S.day, nw:netWorth(), px:{}, qty:{}, rival:S.rival.nw};
+  S.stocks.forEach(s=>start.px[s.sym]=s.price); Object.entries(S.holdings).forEach(([k,v])=>start.qty[k]=v.qty);
+  let reason=''; ffing=true; skipReport=true; S.ffHeldBreak=null;
+  const fills0=S.log.length;
+  for(let n=0;n<5;n++){
+    openMarket(); skipping=true; while(S.t<TICKS) stepTick(); skipping=false; closeMarket(true);
+    if(S.over){ reason=''; break; }
+    // nothing stops the fast-forward: news, messages and life events all wait until after the summary
+    if(newWeek(S.day)) break;
+  }
+  ffing=false; skipReport=false;
+  S.queue=S.queue.filter(q=>q.type!=='report');
+  const syms=[...new Set([...Object.keys(S.holdings),...Object.keys(start.qty)])];
+  const rows=syms.map(sym=>{ const s=stock(sym), h=S.holdings[sym]; return {sym, qty:h?h.qty:0, chg:s.price/start.px[sym]-1, value:h?h.qty*s.price:0, total:h?(s.price-h.cost)*h.qty:0}; }).sort((a,b)=>b.value-a.value);
+  const market=S.stocks.reduce((t,s)=>t+s.price/start.px[s.sym]-1,0)/S.stocks.length;
+  const events=S.log.slice(0,Math.max(0,S.log.length-fills0)).filter(l=>['order','break','goal','strike','event','bill'].includes(l.kind)).slice(0,8);
+  S.lastWeek={from:start.day,to:S.day-1,startNW:start.nw,endNW:netWorth(),rows,reason,market,events,rivalChg:S.rival.nw-start.rival};
+  if(S.over){ save(); render(); showEnd(); return; }
+  S.queue.unshift({type:'week'}); save(); render(); window.scrollTo(0,0); showQueue();
+}
+function showWeek(w, fromQueue){
+  if(!w) return toast('No fast-forward summary yet.');
+  const d=w.endNW-w.startNW;
+  openSheet(`<div class="pixel" style="margin:4px 0 2px">${w.to>w.from?'YOUR WEEK':'YOUR DAY'}</div>
+    <div class="small" style="text-align:center;margin-bottom:10px">${fmtDate(w.from)} – ${fmtDate(w.to)} · market ${pct(w.market)}</div>
+    ${w.reason?`<div class="bubble" style="border-color:#5a4a18;margin-top:0">⏸ Stopped early: ${esc(w.reason)}</div>`:''}
+    <div class="meta">
+      <div><div class="k">Change</div><div class="v ${cls(d)}">${d>=0?'+':''}${money(d,true)}</div></div>
+      <div><div class="k">Net worth</div><div class="v">${money(w.endNW,true)}</div></div>
+      <div><div class="k">Victor</div><div class="v ${w.rivalChg>=0?'down':'up'}">${w.rivalChg>=0?'+':''}${money(w.rivalChg,true)}</div></div>
+    </div>
+    ${(()=>{ const g=openGoals().sort((a,b)=>a.due-b.due)[0]; return g?`<div class="small" style="margin:2px 0 4px">${g.em} Next deadline: <b>${g.name}</b>, ${fmtDate(g.due)} (${tdays(g.due-S.day)}) · ${goalLine(g)}</div>`:''; })()}
+    ${w.rows.length?`<h2>Your stocks this week</h2><div class="card" style="padding:0 12px">${w.rows.map(r=>`<div class="rep-row"><div class="rr1"><span class="sym">${r.sym}</span><span class="small">${r.qty?`${r.qty.toLocaleString()} sh`:'sold'}</span><span class="${cls(r.chg)}" style="font-family:var(--mono)">${pct(r.chg)}</span></div>${r.qty?`<div class="rr2"><span>Value <b>${money(r.value,true)}</b></span><span>Total <b class="${cls(r.total)}">${r.total>=0?'+':''}${money(r.total,true)}</b></span></div>`:''}</div>`).join('')}</div>`:'<p class="small">You didn’t own any stocks this week.</p>'}
+    ${w.events.length?`<h2>What happened</h2><div class="card" style="padding:0 12px">${w.events.map(l=>`<div class="log" style="padding:8px 0"><div class="d">${fmtDate(l.day).toUpperCase()}</div>${esc(l.text)}${l.out?`<div class="o ${l.good?'up':'down'}">${esc(l.out)}</div>`:''}</div>`).join('')}</div>`:''}
+    ${fromQueue&&S.queue.some(q=>q.type==='event')?`<div class="small" style="margin-top:10px;color:var(--gold)">📬 Something happened this week that needs your decision. It’s next.</div>`:''}
+    <button class="btn buy" style="width:100%;margin-top:12px" data-act="${fromQueue?'ack':'close'}">Continue</button>`, true);
+}
+
+function closeMarket(quiet){
+  stopTimer(); S.phase='closed'; S.breaking=[];
+  S.stocks.forEach(s=>{ s.price=s.path?s.path[TICKS]:s.price; s.hist.push(s.price); if(s.hist.length>200) s.hist.shift(); s.path=null; });
+  const dayPL=netWorth()-S.dayStartNW, avgRet=S.stocks.reduce((t,s)=>t+s.price/s.prev-1,0)/S.stocks.length;
+  S.news.forEach(n=>{
+    let o;
+    if(n.sym) o=`${n.sym} day ${pct(stock(n.sym).price/stock(n.sym).prev-1)}`;
+    else if(n.sector){ const ss=S.stocks.filter(s=>s.sector===n.sector); o=`${n.sector} day ${pct(ss.reduce((t,s)=>t+s.price/s.prev-1,0)/ss.length)}`; }
+    else o=`Market day ${pct(avgRet)}`;
+    S.log.unshift({day:S.day,text:n.text,kind:n.kind,out:o,good:!o.includes('-')});
+  });
+  const report=buildReport(dayPL,avgRet);
+  S.day++;
+  // splits
+  S.stocks.forEach(s=>{
+    if(s.price>400){
+      s.price=+(s.price/2).toFixed(2); s.prev/=2; s.fair/=2; s.hist=s.hist.map(x=>+(x/2).toFixed(2));
+      const h=S.holdings[s.sym]; if(h){ ensureLots(h); h.qty*=2; h.cost/=2; h.lots.forEach(l=>{l.qty*=2;l.left*=2;l.price/=2;}); (h.sells||[]).forEach(x=>{x.qty*=2;x.price/=2;}); }
+      addLog(`${s.name} announces a 2-for-1 stock split`,'co','Shares doubled, price halved',true);
+    }
+  });
+  if(newMonth(S.day)) payBills();
+  if(newWeek(S.day)) S.hearts=Math.max(0,S.hearts-2);
+  S.closedNote=S.day>0?closedBetween(S.day-1,S.day):[];
+  S.news=S.next; S.next=makeNews();
+  morningRead();
+  updateRival(avgRet);
+  resolvePending();
+  checkGoals();
+  maybeEvent();
+  coverCash(newMonth(S.day)?'this month’s bills':'today’s costs');
+  if(!S.over && netWorth()<-25000) S.over='bankrupt';
+  if(!S.over && S.rival.nw>=ISLAND && !S.items.includes('island')) S.over='rival';
+  if(report){ S.lastReport=report; if(S.showReport!==false && !skipReport) S.queue.unshift({type:'report'}); }
+  save();
+  if(quiet) return;
+  render(); window.scrollTo(0,0);
+  sfx('close');
+  toast(`🔔 Closing bell · ${dayPL>=0?'+':''}${money(dayPL,true)} today`);
+  if(S.over) showEnd();
+  else if(S.queue.length) setTimeout(showQueue,500);
+  else if(sheetSym) openTrade(sheetSym);
+  else if(sheetNpc) openNpc(sheetNpc);
+}
+let skipReport=false;
+function buildReport(dayPL, avgRet){
+  const T=S.dayTrades||[], q0=S.dayStartQty||{};
+  const syms=[...new Set([...Object.keys(S.holdings), ...Object.keys(q0), ...T.map(t=>t.sym)])];
+  if(!syms.length) return null;
+  const rows=syms.map(sym=>{
+    const s=stock(sym), h=S.holdings[sym], qE=h?h.qty:0, start=q0[sym]||0;
+    const buys=T.filter(t=>t.sym===sym&&t.side==='buy'), sells=T.filter(t=>t.sym===sym&&t.side==='sell');
+    const bought=buys.reduce((a,t)=>a+t.qty*t.price,0), sold=sells.reduce((a,t)=>a+t.qty*t.price,0);
+    const fees=(buys.length+sells.length)*COMMISSION;
+    return {sym, name:s.name, qty:qE, close:s.price, chg:s.price/s.prev-1,
+      dayPL: qE*s.price - start*s.prev + sold - bought - fees,
+      value: qE*s.price, total: h?(s.price-h.cost)*qE:0, totalPct: h?s.price/h.cost-1:0,
+      boughtQty:buys.reduce((a,t)=>a+t.qty,0), soldQty:sells.reduce((a,t)=>a+t.qty,0), realized:sells.reduce((a,t)=>a+(t.gain||0),0)};
+  }).sort((a,b)=>b.value-a.value);
+  return {day:S.day, rows, dayPL, nw:netWorth(), nwStart:S.dayStartNW, cash:S.cash, market:avgRet};
+}
+function showReport(rep, fromQueue){
+  if(!rep) return toast('No report yet. Finish a trading day first.');
+  const held=rep.rows.filter(r=>r.qty>0), gone=rep.rows.filter(r=>r.qty===0);
+  const best=[...held].sort((a,b)=>b.chg-a.chg)[0], worst=[...held].sort((a,b)=>a.chg-b.chg)[0];
+  const row=r=>`<div class="rep-row" ${fromQueue?'':`data-sym="${r.sym}" data-from="art"`}>
+      <div class="rr1"><span class="sym">${r.sym}</span><span class="small">${r.qty?`${r.qty.toLocaleString()} sh @ ${money(r.close)}`:`closed at ${money(r.close)}`}</span><span class="${cls(r.chg)}" style="font-family:var(--mono)">${pct(r.chg)}</span></div>
+      <div class="rr2"><span>Today <b class="${cls(r.dayPL)}">${r.dayPL>=0?'+':''}${money(r.dayPL,true)}</b></span>${r.qty?`<span>Value <b>${money(r.value,true)}</b></span><span>Total <b class="${cls(r.total)}">${r.total>=0?'+':''}${money(r.total,true)}</b></span>`:`<span>Profit on sale <b class="${cls(r.realized)}">${r.realized>=0?'+':''}${money(r.realized,true)}</b></span>`}</div>
+      ${r.boughtQty||r.soldQty?`<div class="small">${r.boughtQty?`Bought ${r.boughtQty.toLocaleString()} today`:''}${r.boughtQty&&r.soldQty?' · ':''}${r.soldQty?`Sold ${r.soldQty.toLocaleString()} today${r.qty?` (${r.realized>=0?'+':''}${money(r.realized,true)} profit)`:''}`:''}</div>`:''}</div>`;
+  openSheet(`<div class="pixel" style="margin:4px 0 2px">CLOSING BELL</div>
+    <div class="small" style="text-align:center;margin-bottom:10px">${fmtDateY(rep.day)} · market ${pct(rep.market)}</div>
+    <div class="meta">
+      <div><div class="k">Today</div><div class="v ${cls(rep.dayPL)}">${rep.dayPL>=0?'+':''}${money(rep.dayPL,true)}</div></div>
+      <div><div class="k">Net worth</div><div class="v">${money(rep.nw,true)}</div></div>
+      <div><div class="k">Cash</div><div class="v">${money(rep.cash,true)}</div></div>
+    </div>
+    ${held.length>1?`<div class="small" style="margin:2px 0 6px">🏆 Best: <b>${best.sym}</b> ${pct(best.chg)} · 📉 Worst: <b>${worst.sym}</b> ${pct(worst.chg)}</div>`:''}
+    ${held.length?`<h2>Your stocks</h2><div class="card" style="padding:0 12px">${held.map(row).join('')}</div>`:''}
+    ${gone.length?`<h2>Sold out today</h2><div class="card" style="padding:0 12px">${gone.map(row).join('')}</div>`:''}
+    <p class="small">“Today” includes trading fees. “Total” is your gain on the shares you still hold.</p>
+    <button class="btn buy" style="width:100%" data-act="${fromQueue?'ack':'close'}">${fromQueue?'Continue':'Close'}</button>`, true);
+}
+function nextBillDay(){ let d=S.day+1; while(d<DEADLINE && !newMonth(d)) d++; return d; }
+function payBills(){
+  const bill=monthlyBills();
+  S.cash-=bill;
+  S.props.forEach(p=>{
+    if(p.owned && p.loan>0){ const int=p.loan*MORT_RATE; p.loan=Math.max(0,p.loan-(p.pay-int)); }
+    p.value=Math.round(p.value*(1+.004+gauss()*.025));
+  });
+  addLog(`Paid monthly bills`,'bill',money(bill),false);
+}
+function checkGoals(){
+  const nw=netWorth();
+  GOALS.forEach(g=>{
+    if(goalState(g)) return;
+    let done=false;
+    if(g.type==='nw') done=nw>=g.target;
+    if(g.type==='home') done=ownsHome();
+    if(g.type==='prop') done=propS(g.prop).owned;
+    if(g.type==='buy') done=S.items.includes(g.id);
+    if(done && S.day<=g.due){ S.goals[g.id]='done'; addLog(`Goal complete: ${g.name}`,'goal','✓',true,g.by); toast(`🏆 Goal complete: ${g.name}`); confetti(); sfx('goal'); S.unread.whitlock=true; return; }
+    if(S.day>g.due){
+      S.goals[g.id]='failed';
+      if(g.final){ S.over='deadline'; return; }
+      if(g.by==='jordan') S.hearts=Math.max(0,S.hearts-25);
+      if(S.goodwill>0){ S.goodwill--; addLog(`Missed: ${g.name} — forgiven thanks to your goodwill`,'strike','No strike',true,'whitlock'); notice('whitlock','A deadline forgiven',`You missed <b>${g.name}</b>. Normally that’s a strike — but your generosity at Edna’s gala bought you some goodwill. Just this once.`); return; }
+      S.strikes++;
+      addLog(`Missed deadline: ${g.name} — strike ${S.strikes} of ${MAX_STRIKES}`,'strike','Strike!',false,'whitlock');
+      notice('whitlock',`Strike ${S.strikes}`,`You missed the deadline for <b>${g.name}</b>. That’s strike ${S.strikes} of ${MAX_STRIKES}.${S.strikes===MAX_STRIKES-1?' <b>One more and the will is void.</b>':''}`);
+      sfx('bad'); S.unread.whitlock=true;
+      if(S.strikes>=MAX_STRIKES) S.over='strikes';
+    }
+  });
+}
+
+// ================= RIVAL =================
+function updateRival(avgRet){
+  const R=S.rival, me=netWorth();
+  const aggressive = me > R.nw*1.3 ? 1.6 : 1;           // he takes bigger risks when he's losing
+  R.nw = Math.max(20000, R.nw*(1 + avgRet*.6 + .0031 + gauss()*.015*aggressive));
+  const lead = me>=R.nw ? 'me' : 'him';
+  if(R.lead && lead!==R.lead){
+    if(lead==='me') toast('😼 You just passed Victor!'); else toast('🦹 Victor has pulled ahead of you');
+    S.unread.victor=true;
+  }
+  R.lead=lead;
+  // sabotage: badmouth your biggest position in tomorrow's paper
+  const hs=Object.entries(S.holdings);
+  if(hs.length && S.day>5 && Math.random()<.05){
+    const [sym]=hs.sort((a,b)=>b[1].qty*stock(b[0]).price-a[1].qty*stock(a[0]).price)[0], s=stock(sym);
+    S.next.push(finishNews({kind:'rumor',sym,tpl:'Anonymous tipster claims {n} is hiding big losses',text:`Anonymous tipster claims ${s.name} is hiding big losses`,sign:-1,mag:rnd(.12,.25),rel:.4}));
+    addLog(`Victor is spreading rumors about ${sym}`,'rival','',false,'victor');
+    notice('victor','Watch your back',`Word is I’ve been chatting with some reporters about <b>${s.name}</b>. Shame if your favorite stock tanked tomorrow, cousin. 😈`);
+    S.unread.victor=true;
+  }
+}
+
+// ================= LIFE EVENTS =================
+const EVENTS = {
+  mom:{once:true, w:1, cond:()=>S.day>20,
+    data:()=>({amt:roundK(Math.max(15000,netWorth()*.03))}),
+    view:d=>({who:'jordan',title:'A family emergency',text:`Jordan’s mom needs surgery, and insurance won’t cover <b>${money(d.amt)}</b>. Jordan hasn’t asked — but you can tell they’re scared.`,
+      choices:[{k:'pay',label:`Pay the ${money(d.amt,true)}`,sub:'Family comes first.'},{k:'no',label:'Stay out of it',sub:'It’s their family’s business… right?'}]}),
+    pick:(k,d)=>{ if(k==='pay'){ spend(d.amt); S.hearts=100; return 'Jordan hugs you for a long time. “I don’t know how to thank you.” ❤️ maxed out.'; }
+      S.hearts=Math.max(0,S.hearts-35); return 'Jordan goes quiet for a few days. Something has changed between you.'; }},
+  startup:{w:1.2, cond:()=>S.day>10 && !S.pending.some(p=>p.type==='startup'),
+    data:()=>({amt:roundK(Math.max(20000,netWorth()*.06)), roll:Math.random(), wait:Math.floor(rnd(40,110))}),
+    view:d=>({who:'dev',title:'A once-in-a-lifetime opportunity?',text:`Your old roommate Dev is building an app that “changes everything.” He needs <b>${money(d.amt)}</b> to keep the lights on. It could be huge… or worth nothing.`,
+      choices:[{k:'in',label:`Invest ${money(d.amt,true)}`,sub:'Results in a few months.'},{k:'out',label:'Pass',sub:'You’ve heard this pitch before.'}]}),
+    pick:(k,d)=>{ if(k==='in'){ spend(d.amt); S.pending.push({day:S.day+d.wait,type:'startup',d}); return `You’re in. Dev promises big news in about ${Math.round(d.wait/30)} months.`; }
+      if(d.roll<.2) S.pending.push({day:S.day+d.wait,type:'startup_missed',d}); return 'Dev shrugs. “Your loss, buddy.”'; }},
+  car:{w:1, cond:()=>S.items.includes('car') && !S.pending.some(p=>p.type==='carbreak'),
+    data:()=>({amt:4000}),
+    view:d=>({who:'jordan',title:'That noise…',text:`The new car is making a horrible grinding noise. The mechanic wants <b>${money(d.amt)}</b> to fix it now.`,
+      choices:[{k:'fix',label:`Fix it — ${money(d.amt)}`,sub:'Better safe than sorry.'},{k:'skip',label:'Ignore it',sub:'It’ll probably stop on its own.'}]}),
+    pick:(k,d)=>{ if(k==='fix'){ spend(d.amt); return 'Good as new.'; } if(Math.random()<.5){ S.pending.push({day:S.day+7,type:'carbreak',d:{amt:15000}}); return 'You turn up the radio. Problem solved… for now.'; } return 'The noise stopped on its own. Lucky!'; }},
+  audit:{once:true, w:3, cond:()=>false,   // paid tips were removed, so the insider-trading probe no longer happens
+    data:()=>({lawyer:roundK(Math.max(20000,netWorth()*.03))}),
+    view:d=>({who:'marty',title:'The Commission comes knocking',text:`Exchange Commission investigators say Marty’s “tips” came from inside information — and you were one of his best customers. They want to talk.`,
+      choices:[{k:'lawyer',label:`Hire a lawyer — ${money(d.lawyer,true)}`,sub:'Make it go away.'},{k:'coop',label:'Cooperate',sub:'Pay a 5% fine. Marty goes quiet for a month.'},{k:'deny',label:'Deny everything',sub:'Risky. Could mean a big fine and a strike.'}]}),
+    pick:(k,d)=>{ if(k==='lawyer'){ spend(d.lawyer); return 'Your lawyer makes a few calls. The case is quietly dropped.'; }
+      if(k==='coop'){ const f=roundK(Math.max(5000,netWorth()*.05)); spend(f); S.martyBan=S.day+21; return `You pay a ${money(f)} fine. Marty is “taking a vacation” for a month.`; }
+      if(Math.random()<.55) return 'They couldn’t prove anything. You walk out whistling.';
+      const f=roundK(Math.max(10000,netWorth()*.12)); spend(f); S.strikes++; if(S.strikes>=MAX_STRIKES) S.over='strikes';
+      return `They had the phone records. ${money(f)} fine, and Mr. Whitlock is <b>not</b> amused — that’s a strike.`; }},
+  gala:{w:1, cond:()=>S.day>30 && S.day-(S.seen.galaDay||-999)>85,
+    data:()=>({amt:roundK(Math.max(10000,netWorth()*.02))}),
+    view:d=>({who:'whitlock',title:'Edna’s charity gala',text:`The annual gala for Aunt Edna’s children’s hospital is tonight. A donation of <b>${money(d.amt)}</b> would be… noticed.`,
+      choices:[{k:'give',label:`Donate ${money(d.amt,true)}`,sub:S.strikes?'Mr. Whitlock may remove a strike.':'Earn goodwill: your next missed deadline is forgiven.'},{k:'no',label:'Skip it',sub:'Keep the cash in the market.'}]}),
+    pick:(k,d)=>{ S.seen.galaDay=S.day; if(k==='no') return 'Victor shows up instead and makes a big show of his check.';
+      spend(d.amt); if(S.strikes>0){ S.strikes--; return '“Edna would be proud.” Mr. Whitlock quietly removes a strike.'; } S.goodwill++; return 'Mr. Whitlock makes a note. Your next missed deadline will be forgiven.'; }},
+  windfall:{w:.9, cond:()=>true,
+    // Edna's estate: 45% goes to you, 45% to Victor, 10% is a bill both heirs must pay
+    data:()=>{ const r=Math.random(); return {amt:roundK(rnd(5000,30000)), to:r<.45?'me':r<.9?'victor':'debt'}; },
+    view:d=>{
+      if(d.to==='me') return {who:'whitlock',title:'Edna’s savings bond',text:`A forgotten savings bond of Edna’s turned up worth <b>${money(d.amt)}</b>. The will says it goes to one heir, chosen by drawing a name from her old hat. Mr. Whitlock draws… <b>you!</b>`,
+        choices:[{k:'keep',label:`Deposit ${money(d.amt,true)}`,sub:'Straight into the trading account.'}]};
+      if(d.to==='victor') return {who:'victor',title:'Edna’s savings bond',text:`A forgotten savings bond of Edna’s turned up worth <b>${money(d.amt)}</b>. Mr. Whitlock draws a name from her old hat… <b>Victor.</b> He pockets the check and winks at you.`,
+        choices:[{k:'ok',label:'Grit your teeth',sub:`Victor’s fortune grows by ${money(d.amt,true)}.`}]};
+      return {who:'whitlock',title:'Edna’s unpaid taxes',text:`The tax office says Edna never paid <b>${money(d.amt)}</b> in back taxes. As heirs, you and Victor <b>each</b> owe that amount.`,
+        choices:[{k:'pay',label:`Pay ${money(d.amt,true)}`,sub:'Get it over with.'},{k:'fight',label:'Fight it in court',sub:'50/50: owe nothing, or owe 1.5× after legal fees.'}]};
+    },
+    pick:(k,d)=>{
+      S.rival.nw += d.to==='victor' ? d.amt : d.to==='debt' ? -d.amt : 0;
+      if(k==='keep'){ S.cash+=d.amt; return `+${money(d.amt)} cash. Victor sulks.`; }
+      if(k==='share'){ S.cash+=d.amt/2; S.hearts=Math.min(100,S.hearts+20); return `+${money(d.amt/2)} cash, and Jordan is thrilled.`; }
+      if(k==='ok') return '“Edna always liked me best,” says Victor.';
+      if(k==='pay'){ spend(d.amt); return `You paid ${money(d.amt)}. Victor paid his share too, grumbling the whole time.`; }
+      if(Math.random()<.5) return 'The judge throws the case out. You owe nothing!';
+      const c=roundK(d.amt*1.5); spend(c); return `You lost in court. With legal fees, it cost you ${money(c)}.`;
+    }},
+  bet:{w:1.2, cond:()=>S.day>15 && !S.pending.some(p=>p.type==='bet'),
+    data:()=>({amt:roundK(Math.max(10000,netWorth()*.05))}),
+    view:d=>({who:'victor',title:'Victor wants a wager',text:`“Let’s make this interesting, cousin. <b>${money(d.amt)}</b> says my fortune grows faster than yours over the next month.”`,
+      choices:[{k:'yes',label:`Take the bet — ${money(d.amt,true)}`,sub:'Whoever grows more (in %) wins.'},{k:'no',label:'Walk away',sub:'He’ll call you a chicken.'}]}),
+    pick:(k,d)=>{ if(k==='no'){ return '“Bawk bawk,” says Victor.'; } S.pending.push({day:S.day+21,type:'bet',d:{amt:d.amt,me:netWorth(),him:S.rival.nw}}); return 'You shake on it. The clock starts now — one month.'; }},
+  wedding:{once:true, w:3, cond:()=>S.items.includes('ring'),
+    data:()=>({small:25000, big:roundK(Math.max(150000,netWorth()*.05))}),
+    view:d=>({who:'jordan',title:'Jordan said yes!',text:`Now for the wedding. Jordan says they’re happy with something small… but their eyes light up at the fancy venues.`,
+      choices:[{k:'small',label:`Small wedding — ${money(d.small,true)}`,sub:'Friends, family, a backyard.'},{k:'big',label:`Lavish wedding — ${money(d.big,true)}`,sub:'Half the city is invited. Whitlock will approve.'}]}),
+    pick:(k,d)=>{ if(k==='small'){ spend(d.small); S.hearts=Math.min(100,S.hearts+15); return 'A perfect day. 💍'; } spend(d.big); S.hearts=100; S.goodwill++; return 'The wedding of the year. Even Mr. Whitlock dances. (+1 goodwill)'; }},
+};
+function maybeEvent(){
+  if(S.over || S.day-S.lastEvent<5 || Math.random()>.2) return;
+  const pool=Object.entries(EVENTS).filter(([id,e])=>!(e.once&&S.seen[id]) && e.cond());
+  if(!pool.length) return;
+  let tot=pool.reduce((t,[,e])=>t+e.w,0), r=Math.random()*tot, chosen=pool[0];
+  for(const p of pool){ r-=p[1].w; if(r<=0){ chosen=p; break; } }
+  const [id,e]=chosen; S.seen[id]=true; S.lastEvent=S.day;
+  S.queue.push({type:'event',id,d:e.data()});
+}
+function notice(who,title,text){ S.queue.push({type:'notice',who,title,text}); }
+function resolvePending(){
+  const due=S.pending.filter(p=>p.day<=S.day); S.pending=S.pending.filter(p=>p.day>S.day);
+  due.forEach(p=>{
+    if(p.type==='startup'){
+      const r=p.d.roll;
+      if(r<.2){ const pay=p.d.amt*10; S.cash+=pay; notice('dev','Dev’s app is a HIT!',`A tech giant just bought Dev’s company. Your share: <b>${money(pay)}</b>. Dev is crying. You might be too.`); confetti(); sfx('goal'); }
+      else if(r<.55){ const pay=p.d.amt*2; S.cash+=pay; notice('dev','Dev sold the company',`Not a home run, but a solid double. You get back <b>${money(pay)}</b>.`); }
+      else notice('dev','Dev’s app shut down',`“We were ahead of our time,” says Dev. Your ${money(p.d.amt)} is gone.`);
+    }
+    if(p.type==='startup_missed') notice('dev','Ouch',`Remember Dev’s app? A tech giant just bought it. Your investment would be worth <b>${money(p.d.amt*10)}</b> today.`);
+    if(p.type==='carbreak'){ spend(p.d.amt); notice('jordan','The car died',`Should have fixed that noise. The engine is toast — <b>${money(p.d.amt)}</b> to replace it.`); }
+    if(p.type==='bet'){
+      const mine=netWorth()/p.d.me-1, his=S.rival.nw/p.d.him-1;
+      if(mine>=his){ S.cash+=p.d.amt; notice('victor','You won the bet',`You grew ${pct(mine)} to Victor’s ${pct(his)}. He grumbles and hands over <b>${money(p.d.amt)}</b>.`); sfx('cash'); }
+      else { spend(p.d.amt); notice('victor','You lost the bet',`Victor grew ${pct(his)} to your ${pct(mine)}. He takes your <b>${money(p.d.amt)}</b> with a grin.`); sfx('bad'); }
+    }
+  });
+}
+function showQueue(){
+  if(!S.queue.length){ closeSheet(); render(); return; }
+  const q=S.queue[0];
+  if(q.type==='report'){ showReport(S.lastReport,true); return; }
+  if(q.type==='week'){ showWeek(S.lastWeek,true); return; }
+  if(q.type==='event'){
+    const v=EVENTS[q.id].view(q.d), n=NPCS[v.who];
+    openSheet(`<div class="sh-top" style="justify-content:flex-start;align-items:center"><div class="av" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:17px">${n.name}</div><div class="small">${n.role}</div></div></div>
+      <div class="evt-title">${esc(v.title)}</div><div class="bubble">${v.text}</div>
+      ${v.choices.map(c=>`<button class="btn ${c===v.choices[0]?'gold':'ghost'} opt" data-choice="${c.k}">${esc(c.label)}<small>${esc(c.sub)}</small></button>`).join('')}`, true);
+  } else {
+    const n=NPCS[q.who];
+    openSheet(`<div class="sh-top" style="justify-content:flex-start;align-items:center"><div class="av" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:17px">${n.name}</div><div class="small">${n.role}</div></div></div>
+      <div class="evt-title">${esc(q.title)}</div><div class="bubble">${q.text}</div>
+      <button class="btn buy" style="width:100%" data-act="ack">OK</button>`, true);
+  }
+}
+// margin call: if cash drops below zero, sell just enough shares (biggest position first) to get back to zero
+function coverCash(reason){
+  if(S.cash>=0 || !Object.keys(S.holdings).length) return;
+  const start=S.cash, sold=[]; let guard=0;
+  while(S.cash<0 && guard++<24){
+    const hs=Object.entries(S.holdings).map(([k,v])=>({sym:k,val:v.qty*stock(k).price})).sort((a,b)=>b.val-a.val);
+    if(!hs.length) break;
+    const s=stock(hs[0].sym), h=S.holdings[s.sym];
+    const q=Math.min(h.qty, Math.max(1,Math.ceil((-S.cash+COMMISSION)/s.price)));
+    execSell(s.sym,q,'Auto-sale');
+    sold.push({sym:s.sym,q,price:s.price});
+  }
+  const raised=S.cash-start;
+  addLog(`Automatic sale to cover ${reason}: ${sold.map(x=>`${x.q.toLocaleString()} ${x.sym}`).join(', ')}`,'order',`+${money(raised)}`,false,'marty');
+  notice('marty','Automatic sale',`Your cash dropped to <b>${money(start)}</b> after ${esc(reason)}, so I sold just enough to cover it:<br>${sold.map(x=>`• ${x.q.toLocaleString()} <b>${x.sym}</b> @ ${money(x.price)}`).join('<br>')}<br><br>${S.cash<0?`That’s everything you had, and you’re still at <b>${money(S.cash)}</b>. Overdrawn cash costs 2% a month.`:`You’re back to <b>${money(S.cash)}</b> in cash.`} Tip: keep a month of bills in cash so I don’t have to do this.`);
+}
+function answerEvent(k){
+  const q=S.queue.shift(); const res=EVENTS[q.id].pick(k,q.d);
+  const pendingCover = S.cash<0;
+  addLog(`${EVENTS[q.id].view(q.d).title}: ${res.replace(/<[^>]+>/g,'')}`,'event','',true,EVENTS[q.id].view(q.d).who);
+  S.queue.unshift({type:'notice',who:EVENTS[q.id].view(q.d).who,title:'What happened',text:res});
+  if(pendingCover){ const n0=S.queue.length; coverCash(EVENTS[q.id].view(q.d).title.toLowerCase().replace(/^edna’s/,'Edna’s')); if(S.queue.length>n0){ const nt=S.queue.pop(); S.queue.splice(1,0,nt); } }
+  checkGoals(); save(); render();
+  if(S.over){ S.queue=[]; showEnd(); } else showQueue();
+}
+
+// ================= ACTIONS =================
+const tradeTime = () => isOpen() ? clockStr(S.t) : '4:00 PM';
+// each purchase is kept as its own "lot"; sells use up the oldest lots first
+function ensureLots(h){ if(!h.lots){ h.lots=[{day:S.day,time:'',qty:h.qty,left:h.qty,price:h.cost,via:'Earlier purchases'}]; h.sells=[]; } return h; }
+function execBuy(sym,q,via){
+  const s=stock(sym); S.cash-=q*s.price+COMMISSION;
+  const h=S.holdings[sym]?ensureLots(S.holdings[sym]):{qty:0,cost:0,lots:[],sells:[]};
+  h.cost=(h.cost*h.qty+q*s.price)/(h.qty+q); h.qty+=q;
+  h.lots.push({day:S.day,time:tradeTime(),qty:q,left:q,price:s.price,via:via||'Bought'});
+  (S.dayTrades=S.dayTrades||[]).push({sym,side:'buy',qty:q,price:s.price});
+  S.holdings[sym]=h;
+  const prot=attachProtection(sym, h.lots.length-1, q, s.price);
+  addLog(`Bought ${q.toLocaleString()} ${sym} @ ${money(s.price)}`,'trade',`${tradeTime()} · ${money(q*s.price+COMMISSION)} spent${via&&via!=='Bought'?' · '+via:''}${prot}`,true);
+}
+// ---- auto-protect: a stop-loss and/or take-profit for every new purchase ----
+const SL_CHOICES=[0,5,10,15,20,25], TP_CHOICES=[0,10,20,30,50,100];
+function protectState(){ S.protect=S.protect||{def:{sl:0,tp:0},per:{}}; return S.protect; }
+function protFor(sym){ const P=protectState(); return P.per[sym]||P.def; }
+function protLabel(p){ return (!p.sl&&!p.tp)?'Off':[p.sl?`stop −${p.sl}%`:'',p.tp?`target +${p.tp}%`:''].filter(Boolean).join(' · '); }
+function attachProtection(sym, lot, qty, price){
+  const p=protFor(sym); if(!p.sl&&!p.tp) return '';
+  S.orders=S.orders||[]; const id=()=>String(Date.now())+Math.floor(Math.random()*1e6); const bits=[];
+  if(p.sl){ const pr=+(price*(1-p.sl/100)).toFixed(2); S.orders.push({id:id(),sym,type:'stop',qty,price:pr,lot,auto:true}); bits.push(`stop ${money(pr)}`); }
+  if(p.tp){ const pr=+(price*(1+p.tp/100)).toFixed(2); S.orders.push({id:id(),sym,type:'tp',qty,price:pr,lot,auto:true}); bits.push(`target ${money(pr)}`); }
+  return ` · 🛡 ${bits.join(' / ')}`;
+}
+// drop sell orders tied to a purchase that has no shares left (keeps stop/target pairs in sync)
+function pruneLotOrders(){
+  S.orders=(S.orders||[]).filter(o=>{ if(o.lot==null||OTYPES[o.type].side!=='sell') return true; const hh=S.holdings[o.sym], l=hh&&hh.lots&&hh.lots[o.lot]; return !!(l&&l.left>0); });
+}
+function openProtect(sym){
+  const P=protectState(), cur=sym?(P.per[sym]||P.def):P.def; sheetSym=null;
+  const pick={sl:cur.sl,tp:cur.tp}; window.__prot={sym,pick};
+  const row=(k,arr)=>`<div class="otypes">${arr.map(v=>`<button data-protk="${k}" data-protv="${v}" class="${pick[k]===v?'on '+(k==='sl'?'sell':'buy'):''}">${v?(k==='sl'?'−':'+')+v+'%':'Off'}</button>`).join('')}</div>`;
+  openSheet(`<div class="sym" style="font-size:20px">🛡 Auto-protect${sym?` · ${sym}`:''}</div>
+    <div class="small" style="margin:4px 0 12px">Every time a buy fills, the game automatically places a <b>stop-loss</b> and/or <b>take-profit</b> for those exact shares. When one fills, the other is canceled.</div>
+    <h2 style="margin-top:0">Stop-loss: sell if it falls</h2>${row('sl',SL_CHOICES)}
+    <h2>Take profit: sell if it rises</h2>${row('tp',TP_CHOICES)}
+    <div class="est" id="protEx" style="margin-top:8px"></div>
+    ${sym?`<button class="btn blue" style="width:100%" data-protsave="one">Save for ${sym} only</button>
+      <button class="btn ghost" style="width:100%;margin-top:8px" data-protsave="def">Save as default for all stocks</button>
+      ${P.per[sym]?`<button class="btn ghost" style="width:100%;margin-top:8px" data-protsave="reset">Use the default for ${sym} (${protLabel(P.def)})</button>`:''}`
+    :`<button class="btn blue" style="width:100%" data-protsave="def">Save as default for all stocks</button>`}
+    <p class="small">Applies to new buys only. Existing shares keep whatever orders they already have. You can still cancel any auto order on the Money tab.</p>
+    <button class="btn ghost" style="width:100%;margin-top:4px" ${sym?`data-sym="${sym}" data-from="art"`:'data-act="close"'}>${sym?`Back to ${sym}`:'Close'}</button>`);
+  updProtEx();
+}
+function updProtEx(){
+  const w=window.__prot; if(!w) return; const s=w.sym?stock(w.sym):S.stocks[0], p=w.pick;
+  $('#protEx').innerHTML = (!p.sl&&!p.tp) ? 'Off: buys won’t get automatic orders.' :
+    `Buy ${s.sym} at ${money(s.price)} → ${p.sl?`<span class="down">stop at ${money(s.price*(1-p.sl/100))}</span>`:''}${p.sl&&p.tp?' · ':''}${p.tp?`<span class="up">target ${money(s.price*(1+p.tp/100))}</span>`:''}`;
+  document.querySelectorAll('[data-protk]').forEach(b=>{ const k=b.dataset.protk, v=+b.dataset.protv; b.className = p[k]===v ? 'on '+(k==='sl'?'sell':'buy') : ''; });
+}
+function execSell(sym,q,via,alloc){
+  const s=stock(sym), h=ensureLots(S.holdings[sym]);
+  let gain=0;   // profit measured against the purchases these shares actually came from
+  S.cash+=q*s.price-COMMISSION; h.qty-=q;
+  if(alloc){ alloc.forEach(a=>{ const lot=h.lots[a.i], take=Math.min(lot.left,a.qty); lot.left-=take; gain+=(s.price-lot.price)*take; }); }
+  else { let r=q; for(const lot of h.lots){ if(r<=0) break; const take=Math.min(lot.left,r); lot.left-=take; r-=take; gain+=(s.price-lot.price)*take; } }
+  const left=h.lots.reduce((t,l)=>t+l.left,0); if(left>0) h.cost=h.lots.reduce((t,l)=>t+l.left*l.price,0)/left;
+  h.sells.push({day:S.day,time:tradeTime(),qty:q,price:s.price,via:via||'Sold',from:alloc?alloc.map(a=>a.i+1):null});
+  (S.dayTrades=S.dayTrades||[]).push({sym,side:'sell',qty:q,price:s.price,gain});
+  if(h.qty<=0) delete S.holdings[sym];
+  pruneLotOrders();
+  addLog(`Sold ${q.toLocaleString()} ${sym} @ ${money(s.price)}`,'trade',`${tradeTime()} · ${gain>=0?'+':''}${money(gain)} profit · ${money(q*s.price-COMMISSION)} received${via&&via!=='Sold'?' · '+via:''}`,gain>=0);
+  return gain;
+}
+function openLotsPicker(sym, want){
+  const s=stock(sym), h=ensureLots(S.holdings[sym]); sheetSym=null;
+  const rows=h.lots.map((l,i)=>({l,i})).filter(x=>x.l.left>0);
+  const dayLbl=d=>fmtDateY(d);
+  openSheet(`<div class="sym" style="font-size:20px">Which ${sym} shares?</div>
+    <div class="small" style="margin:4px 0 10px">You asked to sell <b>${want.toLocaleString()}</b>. Choose how many to sell from each purchase. Price now: <b>${money(s.price)}</b>.</div>
+    <div class="card" style="padding:2px 12px">${rows.map(({l,i})=>{ const g=s.price/l.price-1; return `<div class="lot"><div class="lt"><b>Purchase ${i+1}</b> · ${dayLbl(l.day)}${l.time?' · '+l.time:''}</div>
+      <div class="lr"><span>${l.left.toLocaleString()} held · paid <b>${money(l.price)}</b></span><span class="${cls(g)}">${pct(g)}</span></div>
+      <div class="lotsell"><input class="pk" data-i="${i}" data-max="${l.left}" type="number" inputmode="numeric" min="0" max="${l.left}" placeholder="0"><button class="btn ghost" data-pkmax="${i}">All ${l.left.toLocaleString()}</button></div></div>`}).join('')}</div>
+    <div class="est" id="pkest" style="margin-top:10px"></div>
+    <button class="btn sell" style="width:100%" id="pkGo" data-sym2="${sym}" disabled>Sell</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" data-sym="${sym}" data-from="art">Cancel</button>`);
+  updPicker();
+}
+function updPicker(){
+  let tot=0, gain=0; const s=stock(($('#pkGo')||{}).dataset?.sym2); if(!s) return; const h=S.holdings[s.sym];
+  document.querySelectorAll('.pk').forEach(inp=>{ let v=Math.floor(+inp.value||0); const m=+inp.dataset.max; if(v>m){v=m; inp.value=m;} if(v<0) v=0; tot+=v; gain+=(s.price-h.lots[+inp.dataset.i].price)*v; });
+  $('#pkest').innerHTML = tot ? `Selling ${tot.toLocaleString()} × ${money(s.price)} = ${money(tot*s.price)} · <span class="${cls(gain)}">${gain>=0?'+':''}${money(gain)}</span> (−${money(COMMISSION)} fee)` : 'Enter shares for at least one purchase';
+  $('#pkGo').disabled=!tot; $('#pkGo').textContent=tot?`Sell ${tot.toLocaleString()} shares${isOpen()?'':' at open'}`:'Sell';
+}
+function openLots(sym){
+  const s=stock(sym), h0=S.holdings[sym];
+  if(!h0){ toast(`You don’t own any ${sym} yet`); return; }
+  const h=ensureLots(h0); sheetSym=null;
+  const val=h.qty*s.price, gain=(s.price-h.cost)*h.qty, dayLbl=d=>fmtDateY(d);
+  const lots=h.lots.map((l,i)=>{ const g=s.price/l.price-1, still=l.left;
+    return `<div class="lot ${still?'':'gone'}"><div class="lt"><b>Purchase ${i+1}</b> · ${dayLbl(l.day)}${l.time?' · '+l.time:''}<span class="via">${esc(l.via)}</span></div>
+      <div class="lr"><span>${l.qty.toLocaleString()} sh @ <b>${money(l.price)}</b></span><span class="${cls(g)}">${pct(g)}</span></div>
+      ${still?`<div class="lotsell"><input id="lq${i}" type="number" inputmode="numeric" min="1" max="${still}" placeholder="Shares"><button class="btn ghost" data-lotmax="${i}">All ${still.toLocaleString()}</button><button class="btn sell" data-lotsell="${i}" data-sym2="${sym}">${isOpen()?'Sell':'Sell at open'}</button></div>`:''}
+      <div class="small">${still===l.qty?`All ${still.toLocaleString()} still held · worth ${money(still*s.price,true)} (${(s.price-l.price)*still>=0?'+':''}${money((s.price-l.price)*still,true)})`:still?`${still.toLocaleString()} still held, ${(l.qty-still).toLocaleString()} sold · worth ${money(still*s.price,true)}`:'All sold'}</div></div>`; }).reverse().join('');
+  const sells=(h.sells||[]).map(x=>`<div class="lot"><div class="lt"><b>Sold</b> · ${dayLbl(x.day)} · ${x.time}<span class="via">${esc(x.via)}</span></div><div class="lr"><span>${x.qty.toLocaleString()} sh @ <b>${money(x.price)}</b></span><span class="small">${x.from?'from purchase '+x.from.join(', '):''}</span></div></div>`).reverse().join('');
+  openSheet(`<div class="sh-top"><div><div class="sym" style="font-size:20px">${sym} · your shares</div><div class="nm" style="font-size:13px">${esc(s.name)}</div></div>
+      <div style="text-align:right"><div class="big" style="font-size:20px">${money(s.price)}</div><div class="small">price now</div></div></div>
+    <div class="meta" style="margin-top:12px">
+      <div><div class="k">Shares</div><div class="v">${h.qty.toLocaleString()}</div></div>
+      <div><div class="k">Avg cost</div><div class="v">${money(h.cost)}</div></div>
+      <div><div class="k">Gain</div><div class="v ${cls(gain)}">${money(gain,true)}</div></div>
+    </div>
+    <h2>Purchases <span style="float:right;text-transform:none;letter-spacing:0">newest first</span></h2>
+    <div class="card" style="padding:2px 12px">${lots}</div>
+    ${sells?`<h2>Sales</h2><div class="card" style="padding:2px 12px">${sells}</div>`:''}
+    <p class="small">${isOpen()?'Pick which purchase to sell from: type a number or tap All, then Sell.':'🌅 Pre-market: sales from a purchase are queued and fill at the 9:30 opening price.'}</p>
+    <button class="btn buy" style="width:100%;margin-top:6px" data-sym="${sym}" data-from="art">Back to ${sym}</button>`);
+}
+function trade(sym, qty, side, alloc){
+  if(!isOpen()){
+    // pre-market: queue the trade for the 9:30 opening bell
+    const s0=stock(sym); qty=Math.floor(qty); if(!qty||qty<1) return;
+    S.orders=S.orders||[]; const mk=(type,q,lot)=>S.orders.push({id:String(Date.now())+Math.floor(Math.random()*1e4),sym,type,qty:q,price:null,lot:lot??null});
+    if(side==='buy'){ if(qty*s0.price+COMMISSION>availCash()) return toast(`Not enough cash: ${money(Math.max(0,availCash()),true)} available after your other orders`); mk('obuy',qty); toast(`🌅 Queued: buy ${qty.toLocaleString()} ${sym} at the open`); }
+    else { const h=S.holdings[sym]; if(!h||h.qty<qty) return; if(alloc) alloc.forEach(a=>mk('osell',a.qty,a.i)); else mk('osell',qty); toast(`🌅 Queued: sell ${qty.toLocaleString()} ${sym} at the open`); }
+    sfx('click'); if($('#q')) $('#q').value=''; save(); render(); openTrade(sym); return;
+  }
+  const s=stock(sym); qty=Math.floor(qty); if(!qty||qty<1) return;
+  if(side==='buy'){
+    if(qty*s.price+COMMISSION>availCash()) return toast(`Not enough cash: ${money(Math.max(0,availCash()),true)} available after your orders`);
+    execBuy(sym,qty); toast(`Bought ${qty.toLocaleString()} ${sym} @ ${money(s.price)}`); sfx('click');
+  } else {
+    const h=S.holdings[sym]; if(!h||h.qty<qty) return;
+    const gain=execSell(sym,qty,'Sold',alloc);
+    toast(`Sold ${qty.toLocaleString()} ${sym} · ${gain>=0?'+':''}${money(gain,true)}`); sfx(gain>=0?'cash':'bad');
+  }
+  checkGoals(); save(); render(); if(alloc && S.holdings[sym]) openLots(sym); else openTrade(sym);
+}
+// ---------- order book ----------
+const OTYPES = {
+  obuy: {label:'Buy at open',  side:'buy',  price:false, closedOnly:true, desc:'Buys as soon as the opening bell rings — at whatever the opening price is.'},
+  osell:{label:'Sell at open', side:'sell', price:false, closedOnly:true, desc:'Sells as soon as the opening bell rings — at whatever the opening price is.'},
+  limit:{label:'Limit buy',    side:'buy',  price:true,  desc:'Buys automatically if the price drops to your number or lower.'},
+  tp:   {label:'Take profit',  side:'sell', price:true,  desc:'Sells automatically if the price rises to your target or higher.'},
+  stop: {label:'Stop-loss',    side:'sell', price:true,  desc:'Sells automatically if the price falls to your floor. In a fast drop you may sell a bit lower.'},
+};
+function orderText(o){
+  const q=o.qty.toLocaleString();
+  const from = (o.lot!=null && o.lot!==undefined ? ` (purchase ${o.lot+1})` : '') + (o.auto?' 🛡':'');
+  return {obuy:`Buy ${q} at the open`, osell:`Sell ${q}${from} at the open`, limit:`Buy ${q} if ≤ ${money(o.price)}`, tp:`Sell ${q}${from} if ≥ ${money(o.price)}`, stop:`Stop-loss: sell ${q}${from} if ≤ ${money(o.price)}`}[o.type];
+}
+let filledSyms=new Set();
+function runOrders(atOpen){
+  if(!S.orders||!S.orders.length) return;
+  const keep=[];
+  for(const o of S.orders){
+    const s=stock(o.sym), p=s.price; let fire=false;
+    if(o.type==='obuy'||o.type==='osell') fire=atOpen;
+    else if(o.type==='limit') fire=p<=o.price;
+    else if(o.type==='tp') fire=p>=o.price;
+    else if(o.type==='stop') fire=p<=o.price;
+    if(!fire){ keep.push(o); continue; }
+    fillOrder(o);
+  }
+  // one-cancels-the-other: once a sell order empties a position, drop the other sell orders on it
+  const out=new Set([...filledSyms].filter(sym=>!S.holdings[sym]));
+  S.orders=keep.filter(o=>!(out.has(o.sym) && OTYPES[o.type].side==='sell' && (addLog(`Canceled ${o.sym} order (position closed): ${orderText(o)}`,'order','',false),true)));
+  pruneLotOrders();
+}
+function fillOrder(o){
+  const s=stock(o.sym), T=OTYPES[o.type]; filledSyms.add(o.sym);
+  if(T.side==='buy'){
+    const q=Math.min(o.qty, maxBuy(s));
+    if(q<1){ addLog(`Order canceled — not enough cash: ${o.sym} ${T.label}`,'order','',false); toast(`📋 ${o.sym} ${T.label} canceled — not enough cash`); return; }
+    execBuy(o.sym,q,T.label);
+    toast(`📋 ${T.label}: bought ${q.toLocaleString()} ${o.sym} @ ${money(s.price)}`); sfx('click');
+  } else {
+    const hh=S.holdings[o.sym]; if(hh) ensureLots(hh);
+    const lotObj = hh && o.lot!=null ? hh.lots[o.lot] : null;
+    const held = lotObj ? lotObj.left : (hh?.qty||0), q=Math.min(o.qty,held);
+    if(q<1){ addLog(`Order canceled — no shares to sell: ${o.sym} ${T.label}`,'order','',false); toast(`📋 ${o.sym} ${T.label} canceled — no shares`); return; }
+    const gain=execSell(o.sym,q,T.label, lotObj?[{i:o.lot,qty:q}]:null);
+    toast(`📋 ${T.label}: sold ${q.toLocaleString()} ${o.sym} @ ${money(s.price)} · ${gain>=0?'+':''}${money(gain,true)}`); sfx(gain>=0?'cash':'bad');
+  }
+  buzz(30);
+}
+function placeOrder(){
+  const s=stock(sheetSym), q=Math.floor(+$('#q').value||0), T=OTYPES[orderType];
+  const price=T.price? +(+$('#op').value).toFixed(2) : null;
+  if(q<1 || (T.price && !(price>0))) return;
+  if(T.side==='buy'){ const cost=q*(price||s.price)+COMMISSION; if(cost>availCash()) return toast(`Not enough cash: ${money(Math.max(0,availCash()),true)} available after your other orders`); }
+  S.orders=S.orders||[];
+  const lot = (T.side==='sell' && $('#olot') && $('#olot').value!=='') ? +$('#olot').value : null;
+  S.orders.push({id:String(Date.now())+Math.floor(Math.random()*1e4), sym:s.sym, type:orderType, qty:q, price, lot});
+  addLog(`Order placed: ${s.sym} — ${orderText(S.orders[S.orders.length-1])}`,'order','',true);
+  toast(`📋 Order placed: ${s.sym} ${T.label}`); sfx('click');
+  // a price order that is already in range fills right away while the market is open
+  if(isOpen()) runOrders(false);
+  $('#q').value=''; checkGoals(); save(); render(); openTrade(s.sym);
+}
+function cancelOrder(id){ S.orders=S.orders.filter(o=>o.id!==id); save(); render(); if(sheetSym) openTrade(sheetSym); toast('Order canceled'); }
+function ordersFor(sym){ return (S.orders||[]).filter(o=>o.sym===sym); }
+function orderRow(o, showSym){
+  const c=orderCost(o);
+  return `<div class="ord"><div class="ot">${showSym?`<span class="sym" data-sym="${o.sym}">${o.sym}</span> `:''}${esc(orderText(o))}${c?`<div class="small">≈ ${money(c,true)} reserved</div>`:''}</div><button class="btn ghost" data-cancel="${o.id}">Cancel</button></div>`;
+}
+const maxBuy = s => Math.max(0,Math.floor((S.cash-COMMISSION)/s.price));
+// cash already promised to buy orders that haven't filled yet
+const orderCost = o => o.type==='obuy' ? o.qty*stock(o.sym).price+COMMISSION : o.type==='limit' ? o.qty*o.price+COMMISSION : 0;
+const reservedCash = () => (S.orders||[]).reduce((t,o)=>t+orderCost(o),0);
+const availCash = () => S.cash - reservedCash();
+const maxBuyAvail = (s,price) => Math.max(0,Math.floor((availCash()-COMMISSION)/(price||s.price)));
+function buyItem(id){
+  const g=GOALS.find(x=>x.id===id); if(goalState(g)||S.cash<g.cost) return;
+  if(g.final && S.loan>0){ toast('⚖️ Edna’s will: the island must be bought debt-free. Repay Delia first.'); return; }
+  S.cash-=g.cost; S.items.push(id);
+  if(g.by==='jordan') S.hearts=Math.min(100,S.hearts+25);
+  addLog(`You bought: ${g.name} ${g.em}`,'goal',money(g.cost),true);
+  checkGoals(); if(g.final && S.goals[g.id]==='done') S.over='win';
+  save(); render(); if(S.over){ stopTimer(); showEnd(); }
+}
+function borrow(amt){ amt=Math.min(amt,creditAvail()); if(amt<=0) return; S.loan+=amt; S.cash+=amt; addLog(`Borrowed from Bankrest`,'loan',money(amt),true,'delia'); toast(`🏦 Borrowed ${money(amt)}`); save(); render(); openNpc('delia'); }
+function repay(amt){ amt=Math.min(amt,S.loan,Math.max(0,S.cash)); if(amt<=0) return; S.loan-=amt; S.cash-=amt; addLog(`Repaid Bankrest loan`,'loan',money(amt),true,'delia'); toast(`Repaid ${money(amt)}`); save(); render(); openNpc('delia'); }
+function buyProp(id){
+  const p=propS(id), down=p.value*(DOWN+CLOSING); if(p.owned||S.cash<down) return;
+  S.cash-=down; p.owned=true; p.loan=p.value*(1-DOWN); p.pay=Math.round(p.loan*MORT_PAY);
+  addLog(`Bought ${propD(id).name} with a mortgage`,'prop',`${money(down)} down`,true,'ray');
+  toast(`🔑 ${propD(id).name} is yours!`); checkGoals(); save(); render(); openNpc('ray');
+}
+function sellProp(id){
+  const p=propS(id); if(!p.owned) return;
+  const net=p.value*.95-p.loan; S.cash+=net; p.owned=false; p.loan=0; p.pay=0;
+  addLog(`Sold ${propD(id).name}`,'prop',money(net),net>=0,'ray'); toast(`Sold ${propD(id).name}`); save(); render(); openNpc('ray');
+}
+const tipCost = () => Math.max(1000, Math.round(netWorth()*0.015/100)*100);
+function buyTip(stay){
+  if(S.tipDay===S.day||S.martyBan>S.day) return; const c=tipCost(); if(S.cash<c) return toast('Not enough cash');
+  S.cash-=c; S.tipDay=S.day; S.tipsBought++;
+  const cands=S.next.filter(n=>n.kind!=='mkt'); const n=cands.length?pick(cands):S.next[0];
+  const dir=Math.random()<0.62?n.sign:-n.sign;
+  const subj = n.sym? `<b>${n.sym}</b>` : n.sector? `<b>${n.sector}</b> stocks` : `<b>the whole market</b>`;
+  S.tipShort={sym:n.sym||null, sector:n.sym?null:(n.sector||null), good:dir>0, rumor:n.kind==='rumor'};
+  S.tip = `Keep this between us, kid. <b>Tomorrow’s</b> paper is gonna have news on ${subj} — and it’s ${dir>0?'<b class="up">good</b>':'<b class="down">bad</b>'}. ${n.kind==='rumor'?'Could be just a rumor, though.':'My guy is usually right.'} Get in before today’s closing bell.`;
+  addLog(`Paid Marty for a tip`,'tip',money(c),false,'marty');
+  save(); render(); if(!stay) openNpc('marty');
+}
+// Marty's read is ready automatically every morning
+function morningRead(){ if(S && !S.over && S.martyBan<=S.day && S.readDay!==S.day) freeRead('silent'); }
+function freeRead(stay){
+  S.readDay=S.day;
+  const r=S.stocks.map(s=>({s,v:s.price/s.fair*Math.exp(gauss()*.08)})).sort((a,b)=>a.v-b.v); // Marty is good, not perfect
+  const picks=r.slice(0,2).map(x=>({sym:x.s.sym, gap:Math.round((1-x.v)*100)})).filter(p=>p.gap>=3);
+  const top=r[r.length-1], hot={sym:top.s.sym, gap:Math.round((top.v-1)*100)};
+  S.readPicks={day:S.day, picks, hot};
+  const badNews=sym=>{ const st=stock(sym); return S.news.find(n=>n.sign<0 && (n.sym===sym || (n.kind==='sector'&&n.sector===st.sector) || n.kind==='mkt')); };
+  const lines=picks.map(p=>{ const b=badNews(p.sym);
+    return `<b>${p.sym}</b> looks about <b>${p.gap}% underpriced</b>.${b?` <span class="down">Careful: ${b.kind==='mkt'?'the whole market has':b.sym?'it has':'its sector has'} bad news in this morning’s paper. I’d wait a day or two.</span>`:''}`; });
+  S.read=`Here’s my read. ${lines.length?lines.join(' '):'Nothing looks really cheap today. Everything is close to fair value.'}
+    ${lines.length?' Cheap stocks usually <b>drift back up over a few weeks</b>, not overnight, and the ride can be bumpy. Spread your money and be patient.':''}
+    ${hot.gap>=3?` <b>${hot.sym}</b> looks about ${hot.gap}% <b>overpriced</b>. I wouldn’t chase it.`:''}
+    ${S.mood>.3?' Overall the market’s feeling bullish.':S.mood<-.3?' Overall the market’s nervous, so careful out there.':' Overall the market’s pretty calm.'}`;
+  if(stay==='silent') return;
+  save(); if(stay) render(); else openNpc('marty');
+}
+function dinner(){ const c=800; if(S.cash<c||S.dinnerDay===S.day) return; S.cash-=c; S.dinnerDay=S.day; S.hearts=Math.min(100,S.hearts+12); addLog('Dinner date with Jordan','date',money(c),true,'jordan'); toast('💞 Lovely evening with Jordan'); save(); render(); openNpc('jordan'); }
+
+// ================= RENDER =================
+function spark(h,w=70,ht=26){
+  const d=h.slice(-30), mn=Math.min(...d), mx=Math.max(...d), rg=mx-mn||1;
+  const pts=d.map((v,i)=>`${(i/(d.length-1)*w).toFixed(1)},${(ht-2-(v-mn)/rg*(ht-4)).toFixed(1)}`).join(' ');
+  const col=d[d.length-1]>=d[0]?'var(--green)':'var(--red)';
+  return `<svg width="${w}" height="${ht}" viewBox="0 0 ${w} ${ht}"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+}
+function header(){
+  $('#dayLbl').textContent=`${fmtDate(S.day).toUpperCase()} · YR ${yearOf(S.day)}`;
+  const rsv=reservedCash(), av=S.cash-rsv; $('#cashK').textContent=rsv>0?'Cash available':'Cash'; $('#cashLbl').textContent=money(av,true); $('#cashLbl').className='v '+(av<0?'down':''); $('#cashRsv').textContent=rsv>0?`${money(rsv,true)} in orders`:'';
+  $('#nwLbl').textContent=money(netWorth(),true);
+  $('#strLbl').textContent='⚖️'.repeat(S.strikes)||'—';
+  const tk=S.stocks.map(s=>{const c=chg(s);return `${s.sym} ${s.price.toFixed(2)} <span class="${cls(c)}">${c>=0?'▲':'▼'}${Math.abs(c*100).toFixed(1)}%</span>`}).join('&nbsp;&nbsp;·&nbsp;&nbsp;');
+  const kk=String(S.day)+S.phase+Math.floor(S.t/13); if($('#tick').dataset.k!==kk){ $('#tick').innerHTML=tk; $('#tick').dataset.k=kk; }
+}
+function controls(){
+  const open=isOpen();
+  $('#live').style.display='none';
+  $('#openBtn').disabled=!!S.over;
+  $('#openBtn').textContent=S.queue.length?'📬 YOU HAVE A MESSAGE':open?'🔔 RING THE CLOSING BELL':'🔔 OPEN THE MARKET';
+  $('#ffBtn').style.display=(!open&&!S.queue.length&&!S.over)?'flex':'none';
+  if(false)
+  if(open){
+    $('#clk').textContent=paused&&S.breakPaused?'🚨 PAUSED':clockStr(S.t);
+    $('#cprog').style.width=(S.t/TICKS*100)+'%';
+    $('#live').classList.toggle('paused',paused);
+    $('#pauseBtn').textContent=paused?'▶':'⏸';
+    $('#speedBtn').textContent=speed+'×';
+  }
+}
+function rowHTML(s){
+  const c=chg(s), h=S.holdings[s.sym];
+  return `<div class="row" data-sym="${s.sym}"><div><div class="sym">${s.sym}${h?`<span class="own">${h.qty.toLocaleString()}</span>`:''}${ordersFor(s.sym).length?'<span class="own" style="color:var(--blue);border-color:#24506a">📋</span>':''}</div><div class="nm">${esc(s.name)} · ${s.sector}</div></div>
+    <div>${spark(histNow(s))}</div><div class="px"><div class="p">${s.price.toFixed(2)}</div><div class="c ${cls(c)}">${pct(c)}</div></div></div>`;
+}
+function raceHTML(){
+  const me=netWorth(), him=S.rival.nw, lead=me>=him;
+  return `<div class="race" data-npc="victor"><div class="me ${lead?'up':''}"><div class="lbl">You</div>${money(me,true)}</div><div class="vs">VS</div><div class="vic ${lead?'':'down'}"><div class="lbl">Victor 🦹</div>${money(him,true)}</div></div>`;
+}
+function dueBanner(){
+  const g=openGoals().sort((a,b)=>a.due-b.due)[0]; if(!g) return '';
+  const left=g.due-S.day;
+  return `<div class="due ${left<=14?'hot':''}" data-tab="goals"><div class="em">${g.em}</div><div class="t"><b>Next deadline: ${g.name}</b>${goalLine(g)}</div><div class="dl">${left} day${left===1?'':'s'}<div style="font-size:9px;color:var(--dim)">${fmtDate(g.due,false)}</div></div></div>`;
+}
+function goalLine(g){
+  if(g.type==='nw') return `Net worth ${money(netWorth(),true)} of ${money(g.target,true)}`;
+  if(g.type==='buy') return `Costs ${money(g.cost,true)}`;
+  if(g.type==='home') return `Visit Ray to buy any property`;
+  if(g.type==='prop') return `${money(propS(g.prop).value,true)} — see Ray`;
+  return '';
+}
+function middayCard(){
+  const mkt=S.stocks.reduce((t,s)=>t+s.price/(s.path?s.path[0]:s.price)-1,0)/S.stocks.length, me=netWorth()-S.dayStartNW;
+  return `<div class="due" style="background:#10222e;border-color:#24506a;cursor:default"><div class="em">🕧</div><div class="t"><b>Midday · 12:45 PM</b>Market ${pct(mkt)} since the open${S.breaking.length?` · ${S.breaking.length} breaking stor${S.breaking.length>1?'ies':'y'} this morning`:''}. Trade now at midday prices, or ring the closing bell.</div><div class="dl ${cls(me)}" style="color:inherit">${me>=0?'+':''}${money(me,true)}<div style="font-size:9px;color:var(--dim)">you today</div></div></div>`;
+}
+function martyCard(){
+  const n=NPCS.marty;
+  const face=`<div class="av" data-npc="marty" style="background:${n.bg};width:44px;height:44px;font-size:24px;cursor:pointer">${n.em}</div>`;
+  if(S.martyBan>S.day) return `<div class="mcard">${face}<div class="mbody"><div class="mt">Marty Kessler</div><div class="small">Out on “vacation” until ${fmtDate(S.martyBan)}.</div></div></div>`;
+  const R=S.readPicks&&S.readPicks.day===S.day?S.readPicks:null;
+  const bad=sym=>S.news.some(x=>x.sign<0&&(x.sym===sym||(x.kind==='sector'&&x.sector===stock(sym).sector)||x.kind==='mkt'));
+  let read;
+  if(R){
+    const chips=R.picks.map(p=>`<button class="mchip cheap" data-sym="${p.sym}">${bad(p.sym)?'⚠️ ':''}${p.sym} <b>${p.gap}% cheap</b></button>`).join('')
+      + (R.hot.gap>=3?`<button class="mchip pricey" data-sym="${R.hot.sym}">${R.hot.sym} <b>${R.hot.gap}% pricey</b></button>`:'');
+    read=`<div class="small" style="margin-bottom:5px">Today’s read${R.picks.length?' · cheap stocks usually recover over a few weeks':''}${R.picks.some(p=>bad(p.sym))?' · ⚠️ = bad news today, wait':''}</div><div class="mchips">${chips||'<span class="small">Nothing looks cheap today.</span>'}</div>`;
+  } else read=`<div class="small">Marty’s read will be ready tomorrow morning.</div>`;
+  return `<div class="mcard">${face}<div class="mbody"><div class="mt">Marty Kessler <span class="small">· your broker</span></div>${read}</div></div>`;
+}
+function viewMarket(){
+  const open=isOpen();
+  const no=(S.orders||[]).length;
+  return `${raceHTML()}${dueBanner()}
+  ${no?`<div class="due" style="background:#10222e;border-color:#24506a" data-tab="portfolio"><div class="em">📋</div><div class="t"><b>${no} order${no>1?'s':''} waiting</b>${open?'Watching prices…':'Ready for the opening bell'}</div><div class="dl" style="color:var(--blue)">Manage ›</div></div>`:''}
+  ${open?middayCard():''}
+  ${S.breaking.map((b,i)=>`<div class="brk" data-art="b${i}"><div class="h">🚨 BREAKING · ${b.time}</div><div class="tx">${esc(b.text)}</div><div class="mv ${cls(b.move)}">${b.sym||'Market'} ${pct(b.move)}${paused&&S.breakPaused&&b===S.breaking[0]?' · market paused — tap to read & trade, ▶ to resume':''}</div></div>`).join('')}
+  ${martyCard()}
+  <h2>Morning Edition</h2>
+  <div class="paper"><div class="mast">THE EXCHANGE DAILY</div><div class="sub">${fmtDateY(S.day)} · ${tdays(DEADLINE-S.day)} left in Aunt Edna’s challenge</div>${(S.closedNote||[]).length?`<div class="closed-note" style="text-align:center;margin:-2px 0 6px">🏛️ Market was closed ${S.closedNote.join(" and ")}.</div>`:""}
+    ${S.news.map(n=>{
+      let mv='';
+      if(open && n.moves){ const m=n.sym?n.moves[n.sym]:Object.values(n.moves).reduce((a,b)=>a+b,0)/Math.max(1,Object.keys(n.moves).length); mv=`<div class="mv ${cls(m)}">${n.sym||'Avg'} ${pct(m)} at the open</div>`; }
+      return `<div class="headline" data-art="n${S.news.indexOf(n)}">${newsTag(n)}<div><div class="txt">${esc(n.text)}</div>${mv}</div></div>`}).join('')}
+    ${open?'':'<div class="closed-note">🌅 Pre-market: trades you make now fill at the 9:30 opening price.</div>'}
+  </div>
+  <h2>Pinecrest Stock Exchange ${open?'<span style="color:var(--green)">● MIDDAY 12:45</span>':'<span style="color:var(--dim)">· PRE-MARKET</span>'}</h2>
+  <div class="card">${S.stocks.map(rowHTML).join('')}</div>
+  <p class="small" style="margin-top:12px">Part of each morning story is priced in at the opening bell; the rest plays out during the day. Breaking news can hit any time. You can only trade while the market is open. Trades cost ${money(COMMISSION)}.</p>`;
+}
+function viewPortfolio(){
+  const hs=Object.entries(S.holdings), hv=holdingsValue(), basis=hs.reduce((t,[k,h])=>t+h.qty*h.cost,0);
+  const owned=S.props.filter(p=>p.owned), bills=monthlyBreakdown();
+  return `<h2>Balance sheet</h2>
+  <div class="meta">
+    <div><div class="k">Stocks</div><div class="v">${money(hv,true)}</div></div>
+    <div><div class="k">Home equity</div><div class="v">${money(equity(),true)}</div></div>
+    <div><div class="k">Bank loan</div><div class="v ${S.loan?'down':''}">${money(-S.loan,true)}</div></div>
+  </div>
+  ${(S.orders||[]).length?`<h2>Orders waiting ${reservedCash()>0?`<span style="float:right;text-transform:none;letter-spacing:0">${money(reservedCash(),true)} reserved</span>`:''}</h2><div class="card" style="padding:4px 12px">${S.orders.map(o=>orderRow(o,true)).join('')}</div>`:''}
+  <h2>Stocks <span style="float:right" class="${cls(hv-basis)}">${hs.length?money(hv-basis,true):''}</span></h2>
+  <div class="card">${hs.length?hs.map(([k,h])=>{const s=stock(k),v=h.qty*s.price,g=s.price/h.cost-1;
+    return `<div class="row" data-sym="${k}"><div><div class="sym">${k}</div><div class="nm">${h.qty.toLocaleString()} sh · avg ${money(h.cost)}</div></div><div>${spark(histNow(s))}</div>
+      <div class="px"><div class="p">${money(v,true)}</div><div class="c ${cls(g)}">${pct(g)}</div></div></div>`}).join('')
+    :`<div class="empty">No stocks yet. Open the market and tap any company to trade.</div>`}</div>
+  ${owned.length?`<h2>Property</h2><div class="card" style="padding:4px 12px">${owned.map(p=>{const d=propD(p.id);return `<div class="prop"><div class="em">${d.em}</div><div class="pt"><b>${d.name}</b>Worth ${money(p.value,true)} · owe ${money(p.loan,true)}</div></div>`}).join('')}</div>`:''}
+  <h2>Auto-protect</h2><button class="prot" style="margin:0" data-prot="">🛡 Default for new buys: <b>${protLabel(protectState().def)}</b>${Object.keys(protectState().per).length?` <span class="small">· ${Object.keys(protectState().per).length} stock${Object.keys(protectState().per).length>1?'s':''} customized</span>`:''} <span class="pchg">Change ›</span></button>
+  <h2>Monthly bills <span style="float:right">${money(monthlyBills(),true)}</span></h2>
+  <div class="card" style="padding:8px 12px">${bills.map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span class="small" style="font-size:13px">${k}</span><span style="font-family:var(--mono)">${money(v)}</span></div>`).join('')}
+    <div class="small" style="margin-top:6px">Due on the first trading day of each month · next on ${fmtDate(nextBillDay())}. If a bill or event pushes your cash below zero, Marty automatically sells just enough shares to cover it (biggest position first). Overdrawn cash with no shares left costs 2%/mo. Below -$25K net worth you’re bankrupt.</div></div>
+  <div style="margin-top:18px" class="acts"><button class="btn ghost" data-act="story">Replay story</button><button class="btn ghost" data-act="tutorial">Replay tutorial</button></div>
+  <div style="margin-top:10px" class="acts"><button class="btn ghost" data-act="howto">Quick rules</button><button class="btn ghost" data-act="sound">Sound: ${S.sound?'On 🔊':'Off 🔇'}</button></div>
+  <div style="margin-top:10px" class="acts"><button class="btn ghost" data-act="lastrep">Last closing report</button><button class="btn ghost" data-act="lastweek">Last week</button><button class="btn ghost" data-act="togrep">Daily report: ${S.showReport!==false?"On":"Off"}</button></div>
+  <div style="margin-top:10px;display:none"><button class="btn ghost" style="width:100%" data-act="autopause">Pause on breaking news: ${S.autoPause!==false?'On ⏸':'Off'}</button></div>
+  <div style="margin-top:10px"><button class="btn ghost" style="width:100%;color:var(--red)" data-act="reset">Start a new game</button></div>`;
+}
+function npcLine(id){
+  if(id==='marty') return S.martyBan>S.day?'(Out of office — “vacation”)':S.readDay===S.day?'“Remember: cheap stocks take a few weeks.”':'“Want my read on the market today, kid?”';
+  if(id==='delia') return S.loan?`“Your balance is ${money(S.loan,true)}. Interest is due monthly.”`:`“You qualify for up to ${money(creditAvail(),true)}.”`;
+  if(id==='ray') return ownsHome()?'“How’s the new place treating you?”':'“Still renting? Let’s fix that.”';
+  if(id==='whitlock'){ const g=openGoals().sort((a,b)=>a.due-b.due)[0]; return g?`“${g.name}: due ${fmtDate(g.due)}.”`:'“Your affairs appear to be in order.”'; }
+  if(id==='jordan') return S.hearts>70?'“I’m so proud of you.”':S.hearts>40?'“We should spend more time together.”':'“Do you even notice I’m here?”';
+  if(id==='victor') return netWorth()>=S.rival.nw?'“Enjoy the lead. It won’t last.”':`“I’m ${money(S.rival.nw-netWorth(),true)} ahead, cousin.”`;
+  return '';
+}
+function viewPeople(){
+  return `<h2>People you know</h2><div class="card">${['marty','delia','ray','whitlock','jordan','victor'].map(id=>{const n=NPCS[id]; return `
+    <div class="npc" data-npc="${id}"><div class="av" style="background:${n.bg}">${n.em}</div>
+    <div class="who"><div class="n">${n.name}${S.unread[id]?' <span style="color:var(--red)">●</span>':''}</div><div class="r">${n.role}</div><div class="q">${esc(npcLine(id))}</div></div><div style="color:var(--dim)">›</div></div>`}).join('')}</div>`;
+}
+function viewGoals(){
+  const done=GOALS.filter(g=>goalState(g)==='done').length;
+  return `<h2>Aunt Edna’s Challenge</h2>
+  <div class="card" style="padding:12px 14px"><div class="story">Hit each goal before its deadline. Miss <b>${MAX_STRIKES}</b> and Mr. Whitlock voids the will. Buy the <b>Private Island</b> by ${fmtDateY(DEADLINE)}, debt-free, before Cousin Victor can afford it.</div>
+  <div class="bar" style="margin-top:10px"><i style="width:${done/GOALS.length*100}%"></i></div>
+  <div class="small" style="margin-top:6px">${done} of ${GOALS.length} done · strikes ${S.strikes}/${MAX_STRIKES}${S.goodwill?` · goodwill ${S.goodwill}`:''} · ${tdays(DEADLINE-S.day)} left</div></div>
+  ${raceHTML()}
+  <h2>Goals</h2><div class="card">${GOALS.map(g=>{
+    const st=goalState(g), left=g.due-S.day;
+    let prog=0; if(g.type==='nw') prog=netWorth()/g.target; else if(g.type==='buy') prog=S.cash/g.cost; else if(g.type==='prop') prog=S.cash/(propS(g.prop).value*(DOWN+CLOSING));
+    prog=clamp(prog,0,1);
+    let action='';
+    if(!st && g.type==='buy') action=(g.final&&S.loan>0)?`<button class="btn ghost" data-npc="delia">Repay loan first</button>`:`<button class="btn gold" data-goal="${g.id}" ${S.cash<g.cost?'disabled':''}>Buy</button>`;
+    if(!st && (g.type==='home'||g.type==='prop')) action=`<button class="btn ghost" data-npc="ray">Ray ›</button>`;
+    return `<div class="goal ${st||''}"><div class="em">${st==='done'?'✅':st==='failed'?'❌':g.em}</div>
+      <div class="gt"><div class="gn">${g.name}</div><div class="gd">${esc(g.desc)}${g.upkeep?` Upkeep ${money(g.upkeep)}/mo.`:''}</div>
+      <div class="gc">${goalLine(g)} · <span style="color:${st?'var(--dim)':left<=14?'var(--red)':'var(--gold)'}">${st==='done'?'done':st==='failed'?'missed':`due ${fmtDateY(g.due,false)} (${tdays(left)})`}</span></div>
+      ${!st&&g.type!=='home'?`<div class="bar"><i style="width:${prog*100}%"></i></div>`:''}</div>${action}</div>`}).join('')}</div>`;
+}
+let logFilter='all';
+const LOG_GROUPS={trades:['trade','order'], news:['co','rumor','sector','mkt','break'], life:['event','goal','strike','bill','loan','prop','date','rival','tip']};
+function viewNews(){
+  const list=S.log.filter(l=>logFilter==='all'||(LOG_GROUPS[logFilter]||[]).includes(l.kind));
+  const chip=(k,lab)=>`<button class="${logFilter===k?'on':''}" data-logf="${k}">${lab}</button>`;
+  const badge=l=>l.kind==='trade'?(l.text.startsWith('Bought')?'<span class="lb buyb">BUY</span>':'<span class="lb sellb">SELL</span>'):'';
+  return `<h2>What happened</h2>
+  <div class="logf">${chip('all','All')}${chip('trades','Trades')}${chip('news','News')}${chip('life','Life')}</div>
+  <div class="card">${list.length?list.map(l=>`<div class="log"><div class="d">${fmtDateY(l.day).toUpperCase()}${l.kind==='rumor'?' · RUMOR':''}${l.who&&NPCS[l.who]?' · '+NPCS[l.who].name.toUpperCase():''}</div>${badge(l)}${esc(l.text)}${l.out?`<div class="o ${l.kind==='trade'&&l.text.startsWith('Bought')?'':l.good?'up':'down'}">${esc(l.out)}</div>`:''}</div>`).join('')
+  :`<div class="empty">${logFilter==='trades'?'No trades yet. Tap any stock on the Market tab to buy.':'Nothing here yet.'}</div>`}</div>`;
+}
+const VIEWS={market:viewMarket,portfolio:viewPortfolio,people:viewPeople,goals:viewGoals,news:viewNews};
+function render(){
+  header(); controls();
+  $('#view').innerHTML=VIEWS[tab]();
+  document.querySelectorAll('nav button').forEach(b=>{
+    b.classList.toggle('on',b.dataset.tab===tab);
+    b.querySelector('.dot')?.remove();
+    if(b.dataset.tab==='people' && Object.values(S.unread).some(Boolean)) b.insertAdjacentHTML('beforeend','<span class="dot"></span>');
+  });
+}
+function liveRender(){
+  header(); controls();
+  if(tab==='market'||tab==='portfolio') $('#view').innerHTML=VIEWS[tab]();
+  if(sheetSym && $('#chart')) updateTradeLive();
+}
+
+// ================= SHEETS =================
+function openSheet(html, modal){ $('#sheet').innerHTML=(modal?'':'<div class="grab"></div>')+html; $('#scrim').className='scrim show'+(modal?' modal':''); }
+function closeSheet(){ $('#scrim').className='scrim'; sheetSym=null; sheetNpc=null; }
+
+function openNpc(id){
+  sheetNpc=id; sheetSym=null; S.unread[id]=false; save(); render();
+  const n=NPCS[id]; let say='', opts='';
+  if(id==='marty'){
+    if(S.martyBan>S.day){ say=`<i>A note is taped to Marty’s door: “Gone fishing. Back ${fmtDate(S.martyBan)}. Don’t call.”</i>`; }
+    else {
+      say = S.readDay===S.day && S.read ? S.read : `Marty Kessler, at your service. I’ll give you my read on the market for free, once a day: which stocks look cheap, which look overpriced, and whether this morning’s paper changes anything.`;
+      opts = `<div class="small">A fresh read every morning, before the market opens.</div>`;
+    }
+  }
+  if(id==='delia'){
+    const av=creditAvail();
+    say = S.loan ? `You owe Bankrest <b>${money(S.loan)}</b>. Interest is ${(LOAN_RATE*100).toFixed(2)}% a month, about <b>${money(S.loan*LOAN_RATE)}</b>, taken with your bills. You can borrow up to half your net worth.`
+                 : `Welcome to Bankrest. With your net worth, I can lend you up to <b>${money(av)}</b> at ${(LOAN_RATE*100).toFixed(2)}% a month. Borrowed money still counts against you, so invest it wisely.`;
+    opts = `<div class="meta" style="grid-template-columns:1fr 1fr"><div><div class="k">Owed</div><div class="v">${money(S.loan,true)}</div></div><div><div class="k">Can borrow</div><div class="v">${money(av,true)}</div></div></div>
+      <div class="acts"><button class="btn blue" data-borrow="${Math.min(av,25000)}" ${av<1000?'disabled':''}>Borrow ${money(Math.min(av,25000),true)}</button><button class="btn blue" data-borrow="${av}" ${av<1000?'disabled':''}>Borrow max</button>
+      <button class="btn ghost" data-repay="25000" ${!S.loan||S.cash<=0?'disabled':''}>Repay $25K</button><button class="btn ghost" data-repay="${S.loan}" ${!S.loan||S.cash<=0?'disabled':''}>Repay all</button></div>`;
+  }
+  if(id==='ray'){
+    say = ownsHome() ? `Real estate is the long game, friend. Values usually creep up a little each month. Want to add to the collection?`
+                     : `Rent is money down the drain — ${money(RENT)} a month! Put <b>20% down</b> plus 2% closing and the bank covers the rest. Owning any place ends your rent for good.`;
+    opts = `<div>${PROPS.map(d=>{const p=propS(d.id), down=p.value*(DOWN+CLOSING);
+      return `<div class="prop"><div class="em">${d.em}</div><div class="pt"><b>${d.name}${d.id==='lake'?' ⭐':''}</b>${p.owned?`Worth ${money(p.value,true)} · owe ${money(p.loan,true)} · ${money(p.pay)}/mo`:`${money(p.value,true)} · ${money(down,true)} down · ~${money(p.value*(1-DOWN)*MORT_PAY)}/mo`}</div>
+      ${p.owned?`<button class="btn sell" data-sellprop="${d.id}">Sell</button>`:`<button class="btn gold" data-buyprop="${d.id}" ${S.cash<down?'disabled':''}>Buy</button>`}</div>`}).join('')}</div>
+      <p class="small">Selling costs a 5% agent fee; the rest pays off your mortgage first.</p>`;
+  }
+  if(id==='whitlock'){
+    const up=openGoals().sort((a,b)=>a.due-b.due).slice(0,3);
+    say = S.strikes===0 ? `Your great-aunt was a shrewd woman. She expects results, on schedule. So far you have <b>no strikes</b>. Keep it that way.`
+        : S.strikes===1 ? `You’ve missed a deadline. That’s <b>one strike</b>. Edna allowed for mistakes — but not many.`
+        : `<b>${S.strikes} strikes.</b> One more and I tear up the will. I suggest you focus.`;
+    if(S.goodwill) say+=` You do have <b>${S.goodwill}</b> goodwill banked — I’ll forgive a missed deadline.`;
+    opts = `<h2 style="margin-top:4px">Coming due</h2><div class="card">${up.map(g=>`<div class="goal"><div class="em">${g.em}</div><div class="gt"><div class="gn">${g.name}</div><div class="gc">${goalLine(g)} · <span style="color:var(--gold)">${g.due-S.day} days</span></div></div></div>`).join('')||'<div class="empty">All done!</div>'}</div>`;
+  }
+  if(id==='jordan'){
+    const h=Math.round(S.hearts/20);
+    say = S.hearts>70 ? `I love how driven you are. Just don’t forget the little things — like our anniversary, and maybe… a ring? 😉`
+        : S.hearts>40 ? `You’ve been glued to that ticker all week. How about dinner tonight?`
+        : `I feel like I’m competing with the stock market. And losing.`;
+    opts = `<div class="hearts">${'❤️'.repeat(h)}${'🤍'.repeat(5-h)}</div>
+      <button class="btn gold opt" data-act="dinner" ${S.cash<800||S.dinnerDay===S.day?'disabled':''}>Dinner date — $800<small>Keeps Jordan happy. Missing Jordan’s goals hurts a lot.</small></button>`;
+  }
+  if(id==='victor'){
+    const me=netWorth(), him=S.rival.nw, ahead=him>me;
+    say = pick(ahead?VICTOR_TAUNTS.ahead:VICTOR_TAUNTS.behind) + `<br><br><span class="small">Victor is chasing the same inheritance. If his fortune reaches <b>${money(ISLAND,true)}</b> before you buy the island, he buys it first — and you lose.</span>`;
+    const bet=S.pending.find(p=>p.type==='bet');
+    opts = `<div class="meta" style="grid-template-columns:1fr 1fr"><div><div class="k">You</div><div class="v ${ahead?'':'up'}">${money(me,true)}</div></div><div><div class="k">Victor</div><div class="v ${ahead?'down':''}">${money(him,true)}</div></div></div>
+      ${bet?`<p class="small">Your bet of ${money(bet.d.amt,true)} settles on ${fmtDate(bet.day)}.</p>`:`<button class="btn gold opt" data-act="bet" ${S.day<3?'disabled':''}>Challenge him to a bet<small>Whoever grows faster over the next month wins the pot.</small></button>`}`;
+  }
+  openSheet(`<div class="sh-top" style="justify-content:flex-start;align-items:center"><div class="av" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:17px">${n.name}</div><div class="small">${n.role}</div></div></div>
+    <div class="bubble">${say}</div>${opts}<button class="btn ghost" style="width:100%;margin-top:12px" data-act="close">Leave</button>`);
+}
+
+function openArticle(ref){
+  sheetSym=null; sheetNpc=null;
+  const brk=ref[0]==='b', n=brk?S.breaking[+ref.slice(1)]:S.news[+ref.slice(1)]; if(!n) return;
+  const syms = n.sym?[n.sym] : n.sector? S.stocks.filter(s=>s.sector===n.sector).map(s=>s.sym) : [];
+  let tag = brk? `<span class="tag rumor">🚨 BREAKING · ${n.time}</span>` : newsTag(n);
+  const moveLine = sym=>{ const s=stock(sym), c=chg(s); return `<button class="btn ghost opt" data-sym="${sym}" data-from="art"><span class="sym">${sym}</span> &nbsp;${money(s.price)} <span class="${cls(c)}" style="font-family:var(--mono)">${pct(c)}</span><small>${esc(s.name)} — tap to trade</small></button>`; };
+  openSheet(`<div class="paper" style="margin-top:4px"><div class="mast">THE EXCHANGE DAILY</div>
+      <div class="sub">Day ${S.day+1}${brk?' · '+n.time:' · Morning Edition'}</div>
+      <div style="margin:8px 0 6px">${tag}</div>
+      <div class="art-h">${esc(n.text)}</div>
+      <div class="art-b">${esc(n.blurb||'No further details were available at press time.')}</div></div>
+    ${syms.length?`<h2>${syms.length>1?'Stocks in this story':'The stock'}</h2>${syms.map(moveLine).join('')}`:'<p class="small" style="margin-top:12px">This story affects the whole market — some stocks more than others.</p>'}
+    ${isOpen()?'':'<p class="small">The market is closed. Trading opens at 9:30 AM.</p>'}
+    <button class="btn ghost" style="width:100%;margin-top:12px" data-act="close">Close</button>`);
+}
+function martyHint(sym){
+  const R=S.readPicks; if(!R||R.day!==S.day) return '';
+  const p=R.picks.find(x=>x.sym===sym);
+  if(p) return `<div class="bubble" style="margin:10px 0 0;font-size:13px;border-color:#3b6b4f">🧔 <b>Marty today:</b> about ${p.gap}% underpriced. These usually recover over a few weeks.${S.news.some(n=>n.sign<0&&(n.sym===sym||(n.kind==='sector'&&n.sector===stock(sym).sector)))?' <span class="down">But there’s bad news about it this morning, so he’d wait.</span>':''}</div>`;
+  if(R.hot.sym===sym && R.hot.gap>=3) return `<div class="bubble" style="margin:10px 0 0;font-size:13px;border-color:#6a2430">🧔 <b>Marty today:</b> about ${R.hot.gap}% overpriced. He wouldn’t chase it.</div>`;
+  return '';
+}
+// ---- swipe between stocks on the trade screen ----
+let swipeList=null;
+const swipeSyms = () => (swipeList&&swipeList.length&&swipeList.includes(sheetSym)) ? swipeList : S.stocks.map(s=>s.sym);
+function swipeTo(dir){
+  if(!sheetSym||tutOn) return;
+  const L=swipeSyms(); if(L.length<2) return;
+  const i=(L.indexOf(sheetSym)+dir+L.length)%L.length;
+  if($('#q')) $('#q').value='';
+  openTrade(L[i], dir); sfx('click');
+}
+function openTrade(sym, slideDir){
+  sheetSym=sym; sheetNpc=null;
+  const s=stock(sym), h=S.holdings[sym], prevQty=$('#q')?$('#q').value:'';
+  const story=S.news.find(n=>n.sym===sym), brk=S.breaking.find(b=>b.sym===sym);
+  const mode=tradeMode==='now'?'now':'plan';
+  if(OTYPES[orderType].closedOnly&&isOpen()) orderType='limit';
+  const L=swipeSyms(), pos=L.indexOf(sym);
+  openSheet(`${L.length>1&&pos>=0?`<div class="tnav"><button data-swipe="-1">‹ ${L[(pos-1+L.length)%L.length]}</button><span>${pos+1} of ${L.length} · swipe</span><button data-swipe="1">${L[(pos+1)%L.length]} ›</button></div>`:''}<div class="sh-top"><div><div class="sym" style="font-size:20px">${s.sym}</div><div class="nm" style="font-size:13px">${esc(s.name)} · ${s.sector}</div><button class="about" data-about="${s.sym}">ℹ️ About the company</button></div>
+    <div style="text-align:right"><div class="big" id="tPrice"></div><div id="tChg" style="font-family:var(--mono);font-size:13px"></div></div></div>
+    ${martyHint(sym)}
+    ${brk?`<div class="bubble" style="margin:10px 0 0;font-size:13px;border-color:#6a2430">🚨 ${esc(brk.text)}</div>`:story?`<div class="bubble" style="margin:10px 0 0;font-size:13px">📰 ${esc(story.text)}</div>`:''}
+    <canvas id="chart"></canvas>
+    <div class="meta">
+      <div><div class="k">5-day</div><div class="v" id="t5"></div></div>
+      <div ${h?`class="tap" data-lots="${s.sym}"`:""}><div class="k">You own${h?" ›":""}</div><div class="v">${h?h.qty.toLocaleString():0}</div>${h?`<div class="tapnote">${ensureLots(h).lots.filter(l=>l.left).length} purchase${h.lots.filter(l=>l.left).length===1?"":"s"}</div>`:""}</div>
+      <div><div class="k">Avg cost</div><div class="v">${h?h.cost.toFixed(2):'—'}</div></div>
+      <div><div class="k">Value</div><div class="v" id="tVal"></div></div>
+      <div><div class="k">Gain</div><div class="v" id="tGain"></div></div>
+      <div><div class="k">Volatility</div><div class="v">${s.vol>.06?'Wild':s.vol>.04?'High':'Medium'}</div></div>
+    </div>
+    <div class="seg"><button data-tmode="now" class="${mode==='now'?'on':''}">Trade now</button><button data-tmode="plan" class="${mode==='plan'?'on':''}">Plan an order</button></div>
+    ${mode==='now'&&!isOpen()?'<div class="tclosed">🌅 Pre-market: Buy and Sell are queued and fill at the 9:30 opening price.</div>':''}
+    ${mode==='plan'?`<div class="otypes">${Object.entries(OTYPES).filter(([k,t])=>!(t.closedOnly&&isOpen())).map(([k,t])=>`<button data-otype="${k}" class="${k===orderType?'on':''} ${t.side}">${t.label}</button>`).join('')}</div>
+      <div class="small" style="margin:2px 0 8px">${OTYPES[orderType].desc}</div>
+      ${OTYPES[orderType].side==='sell'&&h&&ensureLots(h).lots.filter(l=>l.left).length>1?`<div class="qty" style="margin:0 0 8px"><span class="small" style="width:92px">Shares from</span><select id="olot">${'<option value="">Any purchase (oldest first)</option>'+h.lots.map((l,i)=>l.left?`<option value="${i}" ${String(orderLot)===String(i)?'selected':''}>Purchase ${i+1}: ${l.left.toLocaleString()} @ ${money(l.price)}</option>`:'').join('')}</select></div>`:''}
+      ${OTYPES[orderType].price?`<div class="qty" style="margin:0 0 4px"><span class="small" style="width:92px">${orderType==='limit'?'Buy at or below':orderType==='tp'?'Sell at or above':'Sell if it falls to'}</span><input id="op" type="number" inputmode="decimal" step="0.01" value="${defaultOrderPrice(s)}"></div>
+        <div class="chips">${[-10,-5,5,10].map(p=>`<button data-pp="${p}">${p>0?'+':''}${p}%</button>`).join('')}</div>`:''}`:''}
+    <div class="qty"><button data-q="-1">−</button><input id="q" type="number" inputmode="numeric" min="1" placeholder="Shares" value="${prevQty}"><button data-q="1">+</button></div>
+    <div class="chips"><button data-qadd="100">+100</button><button data-qadd="1000">+1K</button><button data-qset="maxbuy">Max</button><button data-qset="all">All</button><button data-qset="">Clear</button></div>
+    <div class="est" id="est"></div>
+    ${mode==='now'||OTYPES[orderType].side==='buy'?`<button class="prot" data-prot="${sym}">🛡 Auto-protect new shares: <b>${protLabel(protFor(sym))}</b>${protectState().per[sym]?' <span class="small">(this stock)</span>':''} <span class="pchg">Change ›</span></button>`:''}
+    ${mode==='now'?`<div class="acts"><button class="btn buy" id="buyB">${isOpen()?'Buy':'Buy at open'}</button><button class="btn sell" id="sellB">${isOpen()?'Sell':'Sell at open'}</button></div>`:`<button class="btn blue" style="width:100%" id="placeB">Place order</button>`}
+    ${ordersFor(sym).length?`<h2>Your orders on ${sym}</h2><div class="card" style="padding:4px 12px">${ordersFor(sym).map(o=>orderRow(o,false)).join('')}</div>`:''}
+    <button class="btn ghost" style="width:100%;margin-top:10px" data-act="close">Close</button>`);
+  updateTradeLive();
+  if(slideDir){ const sh=$('#sheet'); sh.classList.remove('sl','sr'); void sh.offsetWidth; sh.classList.add(slideDir>0?'sl':'sr'); sh.scrollTop=0; }
+}
+function defaultOrderPrice(s){
+  const h=S.holdings[s.sym];
+  if(orderType==='limit') return (s.price*.95).toFixed(2);
+  if(orderType==='tp') return (Math.max(s.price,h?h.cost:0)*1.1).toFixed(2);
+  if(orderType==='stop') return (s.price*.9).toFixed(2);
+  return s.price.toFixed(2);
+}
+function updateTradeLive(){
+  const s=stock(sheetSym), h=S.holdings[sheetSym], c=chg(s), hn=histNow(s);
+  const wk=hn.length>6?s.price/hn[hn.length-6]-1:0;
+  $('#tPrice').textContent=money(s.price);
+  $('#tChg').innerHTML=`<span class="${cls(c)}">${pct(c)} today</span>`;
+  $('#t5').innerHTML=`<span class="${cls(wk)}">${pct(wk)}</span>`;
+  $('#tVal').textContent=h?money(h.qty*s.price,true):'—';
+  $('#tGain').innerHTML=h?`<span class="${cls(s.price-h.cost)}">${money((s.price-h.cost)*h.qty,true)}</span>`:'—';
+  drawChart(s); updEst();
+}
+function updEst(){
+  const s=stock(sheetSym); if(!s||!$('#q')) return; const q=Math.floor(+$('#q').value||0), h=S.holdings[s.sym];
+  if($('#placeB')){
+    const T=OTYPES[orderType], pr=T.price?+$('#op').value:s.price;
+    $('#est').textContent = q>0 ? (T.side==='buy'?`≈ ${money(q*pr)} if it fills (+${money(COMMISSION)} fee)`:`You own ${(h?.qty||0).toLocaleString()} — sells up to ${q.toLocaleString()}`) : (T.side==='buy'?`You can afford about ${maxBuyAvail(s,pr).toLocaleString()} at that price (${money(Math.max(0,availCash()),true)} available)`:`You own ${(h?.qty||0).toLocaleString()} shares`);
+    $('#placeB').disabled=!(q>0)||(T.price&&!(pr>0))||!!S.over||(T.side==='buy'&&q*pr+COMMISSION>availCash());
+    return;
+  }
+  $('#est').textContent = q>0 ? `${q.toLocaleString()} × ${money(s.price)} = ${money(q*s.price)}  (+${money(COMMISSION)} fee) · ${money(Math.max(0,availCash()-q*s.price-COMMISSION),true)} left` : `${money(Math.max(0,availCash()),true)} available · max ${maxBuyAvail(s).toLocaleString()}`;
+  $('#buyB').disabled=!(q>0&&q*s.price+COMMISSION<=availCash())||!!S.over;
+  $('#sellB').disabled=!(q>0&&h&&h.qty>=q)||!!S.over;
+}
+function drawChart(s){
+  const cv=$('#chart'); if(!cv) return; const dpr=window.devicePixelRatio||1, w=cv.clientWidth, h=cv.clientHeight;
+  cv.width=w*dpr; cv.height=h*dpr; const x=cv.getContext('2d'); x.scale(dpr,dpr);
+  const open=isOpen();
+  // when the market is open, show today's intraday path on the right third
+  const daily=s.hist.slice(-60), intra=open?s.path.slice(0,S.t+1):[];
+  const all=[...daily,...intra], mn=Math.min(...all), mx=Math.max(...all), rg=mx-mn||1, pad=8;
+  const split=open?w*.62:w, Y=v=>pad+(1-(v-mn)/rg)*(h-pad*2);
+  const col=s.price>=prevClose(s)?'#3ee08f':'#ff5d6c';
+  x.strokeStyle='#24382c'; x.lineWidth=1; for(let i=1;i<4;i++){x.beginPath();x.moveTo(0,h*i/4);x.lineTo(w,h*i/4);x.stroke();}
+  const line=(d,x0,x1,n)=>{ x.beginPath(); d.forEach((v,i)=>{const X=x0+i/((n||d.length)-1)*(x1-x0); i?x.lineTo(X,Y(v)):x.moveTo(X,Y(v));}); };
+  const g=x.createLinearGradient(0,0,0,h); g.addColorStop(0,col+'40'); g.addColorStop(1,col+'00');
+  line(daily,0,split); x.lineTo(split,h); x.lineTo(0,h); x.closePath(); x.fillStyle=g; x.fill();
+  line(daily,0,split); x.strokeStyle=open?'#5d7a68':col; x.lineWidth=2; x.lineJoin='round'; x.stroke();
+  if(open){
+    x.setLineDash([2,3]); x.strokeStyle='#3a5444'; x.beginPath(); x.moveTo(split,0); x.lineTo(split,h); x.stroke(); x.setLineDash([]);
+    if(intra.length>1){ line(intra,split,w,TICKS+1); x.strokeStyle=col; x.lineWidth=2; x.stroke(); }
+    const lx=split+(intra.length-1)/TICKS*(w-split); x.fillStyle=col; x.beginPath(); x.arc(lx,Y(s.price),3.5,0,7); x.fill();
+    x.fillStyle='#8aa596'; x.font='10px IBM Plex Mono'; x.fillText('TODAY',split+4,11);
+  }
+  const hd=S.holdings[s.sym];
+  if(hd&&hd.cost>=mn&&hd.cost<=mx){x.setLineDash([4,4]);x.strokeStyle='#f6c453';x.lineWidth=1;x.beginPath();x.moveTo(0,Y(hd.cost));x.lineTo(w,Y(hd.cost));x.stroke();x.setLineDash([]);x.fillStyle='#f6c453';x.font='10px IBM Plex Mono';x.fillText('your avg',4,Y(hd.cost)-4);}
+  x.fillStyle='#8aa596'; x.font='10px IBM Plex Mono'; x.fillText('60 days',4,11);
+}
+function showHowTo(){
+  openSheet(`<div class="pixel">TICKER TYCOON</div>
+  <div class="story">Great-Aunt Edna left you <b>$100,000</b> and a challenge. Hit her goals on schedule and her whole estate is yours — unless Cousin Victor gets there first.</div>
+  <ul class="how">
+    <li><b>Three stops a day.</b> Trade before the open (fills at 9:30), check in at midday (12:45), then ring the closing bell. Use ⏩ WEEK to skip ahead.</li>
+    <li><b>Breaking news</b> hits in the morning. You’ll see it at midday and can react.</li>
+    <li><b>Plan ahead:</b> set buy-at-open, limit, take-profit and stop-loss orders. They fire on their own during the day.</li>
+    <li><b>Goals have deadlines.</b> Miss ${MAX_STRIKES} and the will is void.</li>
+    <li><b>People:</b> Marty gives a free daily market read, Delia lends money, Ray sells houses, Jordan needs attention, and Victor wants you to fail.</li>
+    <li><b>Life happens.</b> Expect surprises and tough choices.</li>
+  </ul>
+  <button class="btn buy" style="width:100%;margin-top:8px" data-act="startplay">Let’s trade</button>`, true);
+}
+function showEnd(){
+  stopTimer();
+  const nw=netWorth();
+  const title={win:'YOU WIN!',bankrupt:'BANKRUPT',strikes:'WILL VOIDED',deadline:'TIME’S UP',rival:'VICTOR WINS'}[S.over];
+  const msg={win:`You bought the island on day ${S.day+1}. Mr. Whitlock hands over the keys to Edna’s fortune.${S.hearts>50?' Jordan is by your side.':''} Victor is furious.`,
+    bankrupt:`Your debts caught up with you. Delia from Bankrest would like a word.`,
+    strikes:`Too many missed deadlines. Mr. Whitlock sadly closes his briefcase. Victor is already celebrating.`,
+    deadline:`Three years are up and the island is still for sale.`,
+    rival:`Victor hit ${money(ISLAND,true)} and bought the island out from under you. He sends a postcard: “Wish you were here.”`}[S.over];
+  if(S.over==='win'){ confetti(); sfx('goal'); }
+  let best=0; try{ best=+localStorage.getItem('tickerTycoonBest3')||0; if(nw>best) localStorage.setItem('tickerTycoonBest3',nw); }catch(e){}
+  openSheet(`<div class="pixel">${title}</div><div class="story" style="text-align:center">${msg}</div>
+    <div class="meta" style="grid-template-columns:1fr 1fr 1fr;margin-top:14px">
+      <div><div class="k">Net worth</div><div class="v">${money(nw,true)}</div></div>
+      <div><div class="k">Goals</div><div class="v">${GOALS.filter(g=>goalState(g)==='done').length}/${GOALS.length}</div></div>
+      <div><div class="k">Best ever</div><div class="v">${money(Math.max(best,nw),true)}</div></div></div>
+    <button class="btn buy" style="width:100%;margin-top:10px" data-act="newgame">Play again</button>
+    <button class="btn ghost" style="width:100%;margin-top:10px" data-act="close">Look around</button>`, true);
+}
+function confirmReset(){
+  openSheet(`<div class="story" style="text-align:center;margin:6px 0 14px">Start over? Your current game will be lost.</div>
+  <div class="acts"><button class="btn ghost" data-act="close">Cancel</button><button class="btn sell" data-act="newgame">New game</button></div>`, true);
+}
+let toastT;
+function toast(m){ document.querySelectorAll('.toast').forEach(t=>t.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); clearTimeout(toastT); toastT=setTimeout(()=>t.remove(),2200); }
+
+// ================= COMPANY PROFILES =================
+const PROFILES = {
+  NOVA:{founded:1971, hq:'Silicon Row, Pinecrest', ceo:'Harriet Lin', beta:1.0, em:'🖥️',
+    story:['Two engineers started Novatek in a west-side garage, building the city’s first desktop calculator. Fifty years later it makes office computers and <b>NovaDesk</b>, the software that runs payroll for half the businesses in the state.',
+           'Novatek is the steady old giant of tech: profitable, careful and a little boring. Investors call it “the stock your grandmother owns.”'],
+    moves:['Tech headlines: chip supplies, software spending, privacy laws','New product launches and quarterly earnings']},
+  BYTE:{founded:2019, hq:'The Docklands, Pinecrest', ceo:'Kip Darrow', beta:1.4, em:'📶',
+    story:['Bytewave was founded six years ago by a 24-year-old college dropout. It sells <b>WaveLink</b> home internet boxes and runs a chat app that every teenager in Pinecrest seems to have.',
+           'It has never made a profit. Investors are betting on what it <i>could</i> become, so the stock rides waves of hype and panic.'],
+    moves:['Tech headlines and hiring news','Hype: rumors and analyst opinions hit it harder than most','Moves extra hard when the whole market swings']},
+  PTRX:{founded:1912, hq:'Harbor Tower, Pinecrest', ceo:'Walter Grange', beta:0.9, em:'🛢️',
+    story:['The oldest company on the Exchange. Petrolux drills oil off the coast and runs more than 400 orange-and-black <b>Petrolux</b> gas stations across the region.',
+           'Its fortunes rise and fall with fuel prices, and fuel prices rise and fall with the weather, supply problems and world events.'],
+    moves:['Energy headlines: fuel prices, cold snaps, mild winters','Supply disruptions and pipeline news']},
+  SOLR:{founded:2014, hq:'Sunfield Park, East Pinecrest', ceo:'Priya Okafor', beta:1.2, em:'☀️',
+    story:['Sunfield puts solar panels on rooftops. You can spot its blue panels on half the new houses in East Pinecrest. It depends heavily on government incentives that make solar affordable.',
+           'A cheap, jumpy stock: it could become the energy company of the future, or run out of money first.'],
+    moves:['Energy headlines (sometimes the opposite of oil!)','Government contracts and policy news','Wild swings: one of the most volatile stocks']},
+  GRUB:{founded:1948, hq:'Mill Street, Pinecrest', ceo:'Gus Brennan', beta:0.55, em:'🍔',
+    story:['GrubHaus began as a single diner on Mill Street. Today it makes frozen dinners, <b>Crunchos</b> corn chips, and runs 200 GrubHaus diners known for their milkshakes. The CEO is the founder’s grandson.',
+           'People eat in good times and bad, so GrubHaus is the calmest stock on the Exchange, a safe place to park money when things get scary.'],
+    moves:['Food headlines: crop prices and restaurant traffic','Barely flinches at market-wide news']},
+  CRNR:{founded:1889, hq:'Valley Road, Pinecrest County', ceo:'Ada Whitfield', beta:0.7, em:'🌾',
+    story:['Cornerstone owns more farmland than anyone in the valley: endless fields of wheat and corn. It sells its harvest to food makers like GrubHaus.',
+           'It lives and dies by the weather. A drought can wipe out a season, and a bumper crop can mean a record year.'],
+    moves:['Food headlines: harvests, droughts, grain prices','Usually calm when the wider market panics']},
+  MEDX:{founded:1955, hq:'Medical Mile, Pinecrest', ceo:'Dr. Leonard Shaw', beta:0.8, em:'💊',
+    story:['Medixa is a big drug company. Its best seller, the blood-pressure pill <b>Calmora</b>, is in medicine cabinets everywhere. It spends millions developing new medicines each year.',
+           'When regulators approve one of its drugs, the stock can leap. When lawmakers talk about price caps, it sinks.'],
+    moves:['Health headlines: drug approvals and price caps','Lawsuits and recalls']},
+  VITA:{founded:2016, hq:'University Labs, Pinecrest', ceo:'Dr. Mina Castillo', beta:1.1, em:'🧬',
+    story:['Vitacore is a small biotech lab spun out of Pinecrest University. Its scientists are chasing a cure for the common cold, and they claim they’re close.',
+           'It has almost no sales yet, so the stock is a bet on one big breakthrough. Good test results send it soaring; bad ones can halve it overnight.'],
+    moves:['Health headlines and drug approvals','Rumors: very sensitive to lab whispers','Wild swings in both directions']},
+  ZOOM:{founded:1938, hq:'Assembly Ave, Pinecrest', ceo:'Frank Delgado', beta:1.15, em:'🚗',
+    story:['Zoomline is Pinecrest’s hometown automaker. It has built family sedans and pickup trucks on Assembly Avenue for almost ninety years. Half the town has a relative who works there.',
+           'When people feel rich, they buy new cars. When money is tight, they keep the old one. That makes Zoomline a mirror of the economy.'],
+    moves:['Auto headlines: car sales, steel costs, car loans','Gas prices','Follows the overall economy closely']},
+  VOLT:{founded:2020, hq:'The Foundry, Pinecrest', ceo:'Rex Halvorsen', beta:1.5, em:'⚡',
+    story:['Voltcar wants to replace every gas car with an electric one. Right now it sells about three cars a day. Its CEO, Rex Halvorsen, makes bold promises on TV almost every week.',
+           'The cheapest and wildest stock on the Exchange. Fans think it’s the next big thing; skeptics think it’s a bonfire of cash.'],
+    moves:['Auto headlines and anything Rex says','Huge swings on market-wide news','The most volatile stock on the Exchange']},
+  BNKR:{founded:1902, hq:'Bankrest Plaza, Pinecrest', ceo:'Margaret Ashby', beta:1.1, em:'🏦',
+    story:['The bank where Delia works. Bankrest holds the savings of half the city and makes mortgages, car loans and business loans.',
+           'Banks earn more when interest rates rise and get nervous when borrowers stop paying. Bankrest usually rises and falls with the economy.'],
+    moves:['Finance headlines: interest rates, loan defaults, new rules','Market-wide news, especially recession fears']},
+  GLDN:{founded:1926, hq:'Northern Hills, Pinecrest County', ceo:'Dusty McCall', beta:0.35, em:'⛏️',
+    story:['Goldenreach digs gold and copper out of the northern hills. Copper goes into new buildings and wires; gold goes into vaults.',
+           'When investors get scared, they buy gold, so Goldenreach often holds up when everything else is falling. Some traders keep it around as insurance.'],
+    moves:['Mining headlines: metal prices, strikes, infrastructure','Hardly reacts to market-wide news, a good hedge']},
+};
+function openProfile(sym){
+  const s=stock(sym), P=PROFILES[sym]; sheetSym=null; sheetNpc=null;
+  const vol=s.vol>.06?'Wild':s.vol>.04?'High':s.vol>.03?'Medium':'Low';
+  const sens=P.beta>=1.3?'Very high':P.beta>=1.05?'High':P.beta>=.8?'Average':P.beta>=.5?'Low':'Very low';
+  const c=chg(s);
+  openSheet(`<div class="sh-top" style="align-items:center"><div style="display:flex;gap:12px;align-items:center"><div class="av big" style="background:var(--panel2)">${P.em}</div>
+      <div><div class="sym" style="font-size:20px">${s.sym}</div><div class="nm" style="font-size:13px">${esc(s.name)}</div></div></div>
+      <div style="text-align:right"><div class="big" style="font-size:20px">${money(s.price)}</div><div class="${cls(c)}" style="font-family:var(--mono);font-size:12px">${pct(c)} today</div></div></div>
+    <div class="meta" style="margin-top:12px">
+      <div><div class="k">Sector</div><div class="v">${s.sector}</div></div>
+      <div><div class="k">Founded</div><div class="v">${P.founded}</div></div>
+      <div><div class="k">CEO</div><div class="v" style="font-size:12px">${esc(P.ceo)}</div></div>
+    </div>
+    <div class="small" style="margin:2px 0 10px">📍 ${esc(P.hq)}</div>
+    <div class="bubble" style="font-size:14.5px">${P.story.map(t=>`<p style="margin:0 0 8px">${t}</p>`).join('')}</div>
+    <h2>What moves this stock</h2>
+    <ul class="how" style="margin-top:0">${P.moves.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>
+    <div class="meta" style="grid-template-columns:1fr 1fr">
+      <div><div class="k">Daily swings</div><div class="v">${vol}</div></div>
+      <div><div class="k">Reacts to market news</div><div class="v">${sens}</div></div>
+    </div>
+    <button class="btn buy" style="width:100%;margin-top:10px" data-sym="${sym}" data-from="art">Trade ${sym}</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" data-act="close">Close</button>`);
+}
+
+// ================= STORY & TUTORIAL =================
+const STORY=[
+  {who:null, text:'Pinecrest City. A rainy Monday morning. An envelope arrives on heavy cream paper, sealed with wax…'},
+  {who:'whitlock', text:'Good morning. I am Mr. Whitlock, attorney for your great-aunt <b>Edna Ashworth</b>. I’m sorry to tell you she passed away last week, at the age of 97.'},
+  {who:'whitlock', text:'Edna built her fortune trading on the <b>Pinecrest Stock Exchange</b>, and it is considerable. Her will, however, is… unusual.'},
+  {who:'whitlock', text:'She has left you <b>$100,000</b>. Not as a gift but as a test. Grow it, live well, and prove you can handle money, and you inherit her <b>entire estate</b>.'},
+  {who:'whitlock', text:'Edna wrote a list of <b>13 goals</b>: a sharp suit, a home, a car, a ring, all the way up to a <b>private island</b>. Each has a deadline. Miss <b>three</b> deadlines and the will is void. Buy the island within <b>three years</b>, free of debt, and everything is yours.'},
+  {who:'victor', text:'Not so fast, cousin. Aunt Edna gave <b>me</b> the same $100K and the same deal. If my fortune hits <b>$5 million</b> before you buy that island, I buy it first and you get <b>nothing</b>. 😈'},
+  {who:'whitlock', text:'…Yes. Your cousin Victor. Do keep an eye on him. Now, you’ll want some help. Edna kept a few people she trusted.'},
+  {who:'marty', text:'Marty Kessler, stockbroker. I give you a <b>free read</b> on the market once a day: which stocks look cheap, which look overheated.'},
+  {who:'delia', text:'Delia Park, Bankrest. When you want more money to invest, I can lend you up to <b>half your net worth</b>. Interest is due every month, so don’t borrow what you can’t pay back.'},
+  {who:'ray', text:'Ray Alvarez, real estate! You’re paying <b>$1,800 a month</b> in rent. Buy a place from me with 20% down and the rent goes away. Edna’s old <b>lake house</b> is on my list too.'},
+  {who:'jordan', text:'And then there’s me, Jordan. Your partner, remember? 😉 I’m proud of you. Just don’t forget about us while you’re glued to that ticker. A few of Edna’s goals are for me.'},
+  {who:'whitlock', text:'Rent and living costs come due on the first of every month, and life will throw surprises at you. You’ll find everyone in the <b>People</b> tab. The market opens at 9:30 tomorrow. Good luck.', last:true},
+];
+function showStory(i){
+  const p=STORY[i], n=p.who?NPCS[p.who]:null;
+  const dots=STORY.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+  openSheet(`${i===0?'<div class="pixel" style="font-size:15px;margin-top:10px">TICKER TYCOON</div>':''}
+    ${n?`<div class="story-who"><div class="av big" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:18px">${n.name}</div><div class="small">${n.role}</div></div></div>`:'<div style="font-size:54px;text-align:center;margin:8px 0">✉️</div>'}
+    <div class="bubble story-text">${p.text}</div>
+    <div class="dots">${dots}</div>
+    ${p.last?`<button class="btn buy" style="width:100%;margin-top:4px" data-act="tutstart">Show me how to play</button>
+      <button class="btn ghost" style="width:100%;margin-top:8px" data-act="tutno">Skip the tutorial</button>`
+    :`<div class="acts" style="margin-top:4px">${i?`<button class="btn ghost" data-story="${i-1}">Back</button>`:`<button class="btn ghost" data-act="storyskip">Skip story</button>`}<button class="btn buy" data-story="${i+1}">Next ›</button></div>`}`, true);
+}
+function finishStory(){ S.storySeen=true; S.intro=false; save(); }
+
+let tutI=-1, tutOn=false;
+function tutTrade(mode, otype){
+  const sym=Object.keys(S.holdings)[0]||S.stocks[0].sym;
+  tradeMode=mode; if(otype) orderType=otype;
+  if($('#q')) $('#q').value='';
+  openTrade(sym);
+}
+const TUT=[
+  {sel:'.stats', setup:()=>{ closeSheet(); tab='market'; render(); window.scrollTo(0,0); },
+   text:'<b>Cash</b> is money you can spend right now. <b>Net worth</b> is everything you own minus everything you owe. That’s your score. <b>Strikes</b> are missed deadlines. Three and you lose.'},
+  {sel:'.race', text:'Your race against Cousin Victor. If his fortune reaches $5M before you buy the island, he wins. Tap this anytime to visit him.'},
+  {sel:'.due', text:'Your next deadline from Edna’s list. It turns red when it’s due within two weeks. Tap it to see every goal.'},
+  {sel:'.paper', text:'The <b>Morning Edition</b>. These headlines move prices when the market opens. Tap any headline to read the article. <b>Confident</b> articles usually hold up; <b>doubtful</b> ones often fall apart. Rumors are a coin flip.'},
+  {sel:'.card .row', text:'Each row is a company: its ticker symbol, its last 30 trading days, its price and today’s change. Tap a company to trade it. Let’s open one.'},
+  {sel:'.about', setup:()=>tutTrade('now'), text:'Tap <b>ℹ️ About the company</b> to learn what the business does, who runs it and what tends to move its stock.'},
+  {sel:'#chart', text:'The price chart for the last 60 days. During the live day, today’s moves draw on the right. If you own shares, a yellow dashed line marks the average price you paid.'},
+  {sel:'#sheet .meta', text:'Quick stats: the 5-day change, how many shares you own, what you paid, what they’re worth, and how <b>wild</b> the stock is. Wild stocks swing hard in both directions.'},
+  {sel:'#sheet .seg', text:'Two ways to trade. <b>Trade now</b>: before the open your trade is queued and fills at the 9:30 opening price; at midday it fills instantly. <b>Plan an order</b> sets up a trade that fires on its own when a price is hit.'},
+  {sel:'#q', hl:'parent', text:'How many shares to trade. Type a number, or use <b>−</b> and <b>+</b> to adjust by one.'},
+  {sel:'#sheet .chips', text:'Shortcuts: <b>+100</b> and <b>+1K</b> add shares with each tap. <b>Max</b> fills in the most you can afford. <b>All</b> fills in every share you own, for selling. <b>Clear</b> starts over.'},
+  {sel:'#sheet .acts', text:'<b>Buy</b> and <b>Sell</b> (they say “at open” before the market opens). Every trade costs a <b>$10 fee</b>, so lots of tiny trades eat into your profit. To make money, sell for more than you paid.'},
+  {sel:'#sheet .otypes', setup:()=>tutTrade('plan','obuy'), text:'<b>Buy at open / Sell at open:</b> trades the moment the bell rings. Great for acting on the morning paper or Marty’s read.<br><b>Limit buy:</b> buys only if the price drops to your number.<br><b>Take profit:</b> sells when the price rises to your target.<br><b>Stop-loss:</b> sells if the price falls to your floor, so a crash can’t wipe you out.'},
+  {sel:'#op', hl:'parent', setup:()=>tutTrade('plan','stop'), text:'Limit, take-profit and stop-loss orders need a <b>trigger price</b>. The <b>−10%…+10%</b> buttons below set it quickly. This stop-loss would sell if the price fell 10%.'},
+  {sel:'#placeB', text:'<b>Place order</b> saves it. Orders stay until they fill or you cancel them. Stocks with waiting orders show a 📋 badge, and you can manage all orders on the Money tab. If a stop-loss sells your shares, your take-profit on that stock cancels automatically.'},
+  {sel:'#openBtn', setup:()=>{ if($('#q')) $('#q').value=''; closeSheet(); window.scrollTo(0,0); },
+   text:'Each trading day has three stops. <b>Now (pre-market):</b> read the paper and place trades. Tap <b>Open the market</b> to jump to <b>midday</b>: see the morning’s moves and breaking news, and trade again. Then <b>ring the closing bell</b> for your daily report. The blue <b>⏩ WEEK</b> button plays out the rest of the week for you without stopping. Any life events or messages pop up after the weekly summary.'},
+  {sel:'nav', text:'<b>Money:</b> your stocks, homes, loans, orders and bills.<br><b>People:</b> Marty, Delia, Ray, Mr. Whitlock, Jordan and Victor.<br><b>Goals:</b> Edna’s list and deadlines.<br><b>Log:</b> everything that has happened.<br>You’re ready. Good luck!'},
+];
+function startTutorial(){ tutOn=true; tutI=0; stopTimer(); showTut(); }
+function showTut(){
+  const st=TUT[tutI]; if(st.setup) st.setup();
+  setTimeout(()=>{
+    let el=document.querySelector(st.sel); if(el&&st.hl==='parent') el=el.parentElement;
+    if(el) el.scrollIntoView({block:'center'});
+    setTimeout(()=>placeTut(el,st),80);
+  }, st.setup?300:40);
+}
+function placeTut(el,st){
+  let ov=$('#tut'); if(!ov){ ov=document.createElement('div'); ov.id='tut'; document.body.appendChild(ov); }
+  const H=window.innerHeight, pad=6;
+  const r=el?el.getBoundingClientRect():{top:H/2,left:20,width:0,height:0,bottom:H/2};
+  const top=Math.max(4,r.top-pad), bot=Math.min(H-4,r.bottom+pad);
+  const roomBelow=H-bot, roomAbove=top;
+  const pos = roomBelow>=roomAbove ? `top:${bot+10}px` : `bottom:${H-top+10}px`;
+  ov.innerHTML=`<div class="tut-hole" style="top:${top}px;left:${r.left-pad}px;width:${r.width+pad*2}px;height:${bot-top}px"></div>
+    <div class="tut-card" style="${pos}"><div class="tut-step">HOW TO PLAY · ${tutI+1} of ${TUT.length}</div><div class="tut-text">${st.text}</div>
+    <div class="tut-btns"><button data-tut="skip" class="lnk">Skip tutorial</button><span style="flex:1"></span>${tutI?'<button data-tut="back" class="btn ghost">Back</button>':''}<button data-tut="next" class="btn buy">${tutI===TUT.length-1?'Finish':'Next ›'}</button></div></div>`;
+}
+function endTut(){
+  tutOn=false; $('#tut')?.remove(); if($('#q')) $('#q').value=''; closeSheet();
+  tradeMode='now'; orderType='obuy'; tab='market'; S.tutDone=true; save(); render(); window.scrollTo(0,0);
+  toast('Tap 🔔 Open the market when you’re ready!');
+}
+function tutNav(k){
+  if(k==='skip') return endTut();
+  tutI += k==='next'?1:-1;
+  if(tutI>=TUT.length) return endTut();
+  showTut();
+}
+
+// ================= EVENTS =================
+document.addEventListener('click',e=>{
+  if(e.target.closest('#tut')){ const b=e.target.closest('[data-tut]'); if(b) tutNav(b.dataset.tut); return; }
+  if(e.target.id==='scrim'){ if($('.story-text')) return; if(S.queue.length&&$('[data-choice],[data-act=ack]')) return; closeSheet(); return; }
+  const t=e.target.closest('[data-tab],[data-sym],[data-goal],[data-act],[data-q],[data-qset],[data-qadd],[data-npc],[data-borrow],[data-repay],[data-buyprop],[data-sellprop],[data-choice],[data-story],[data-about],[data-prot],[data-protk],[data-protsave],[data-logf],[data-swipe],[data-lots],[data-lotsell],[data-lotmax],[data-pkmax],#pkGo,[data-art],[data-tmode],[data-otype],[data-pp],[data-cancel],#buyB,#sellB,#placeB');
+  if(!t) return; const d=t.dataset;
+  if(d.choice){ answerEvent(d.choice); return; }
+  if(d.story){ showStory(+d.story); return; }
+  if(d.swipe){ swipeTo(+d.swipe); return; }
+  if(d.logf){ logFilter=d.logf; render(); return; }
+  if(d.prot!==undefined){ openProtect(d.prot||null); return; }
+  if(d.protk){ window.__prot.pick[d.protk]=+d.protv; updProtEx(); return; }
+  if(d.protsave){ const P=protectState(), w=window.__prot;
+    if(d.protsave==='def') P.def={...w.pick}; if(d.protsave==='one') P.per[w.sym]={...w.pick}; if(d.protsave==='reset') delete P.per[w.sym];
+    save(); toast(`🛡 Auto-protect ${d.protsave==='one'?'for '+w.sym:'default'}: ${protLabel(d.protsave==='reset'?P.def:w.pick)}`); render(); if(w.sym) openTrade(w.sym); else closeSheet(); return; }
+  if(d.about){ openProfile(d.about); return; }
+  if(d.lots){ openLots(d.lots); return; }
+  if(d.lotmax!==undefined){ const i=+d.lotmax, l=S.holdings[$('[data-lotsell]').dataset.sym2].lots[i]; $('#lq'+i).value=l.left; return; }
+  if(d.lotsell!==undefined){ const i=+d.lotsell, sym=d.sym2, q=Math.floor(+$('#lq'+i).value||0), l=S.holdings[sym]?.lots[i]; if(!l||q<1) return toast('Enter how many shares to sell'); const n=Math.min(q,l.left); trade(sym,n,'sell',[{i,qty:n}]); return; }
+  if(d.pkmax!==undefined){ const inp=document.querySelector(`.pk[data-i="${d.pkmax}"]`); inp.value=inp.dataset.max; updPicker(); return; }
+  if(t.id==='pkGo'){ const sym=d.sym2, alloc=[]; document.querySelectorAll('.pk').forEach(inp=>{ const v=Math.min(Math.floor(+inp.value||0),+inp.dataset.max); if(v>0) alloc.push({i:+inp.dataset.i,qty:v}); }); const tot=alloc.reduce((a,b)=>a+b.qty,0); if(tot) trade(sym,tot,'sell',alloc); return; }
+  if(d.art){ openArticle(d.art); return; }
+  if(d.tmode){ tradeMode=d.tmode; if(d.tmode==='plan') orderType=isOpen()?'limit':'obuy'; openTrade(sheetSym); return; }
+  if(d.otype){ orderType=d.otype; openTrade(sheetSym); return; }
+  if(d.pp){ const s=stock(sheetSym); $('#op').value=(s.price*(1+d.pp/100)).toFixed(2); updEst(); return; }
+  if(d.cancel){ cancelOrder(d.cancel); return; }
+  if(t.id==='placeB'){ placeOrder(); return; }
+  if(d.tab){ tab=d.tab; render(); window.scrollTo(0,0); return; }
+  if(d.npc){ $('#q')&&($('#q').value=''); openNpc(d.npc); return; }
+  if(d.goal){ buyItem(d.goal); return; }
+  if(d.borrow){ borrow(+d.borrow); return; }
+  if(d.repay){ repay(+d.repay); return; }
+  if(d.buyprop){ buyProp(d.buyprop); return; }
+  if(d.sellprop){ sellProp(d.sellprop); return; }
+  if(d.sym && (!t.closest('#sheet')||d.from==='art')){ if(!t.closest('#sheet')) swipeList = (tab==='portfolio' && S.holdings[d.sym]) ? Object.keys(S.holdings) : null; $('#q')&&($('#q').value=''); tradeMode='now'; orderType=isOpen()?'limit':'obuy'; openTrade(d.sym); return; }
+  if(d.q){ const q=$('#q'); q.value=Math.max(1,(Math.floor(+q.value)||0)+(+d.q)); updEst(); return; }
+  if(d.qadd){ const q=$('#q'); q.value=(Math.floor(+q.value)||0)+(+d.qadd); updEst(); return; }
+  if(d.qset!==undefined){ const s=stock(sheetSym), v=d.qset; $('#q').value=v==='maxbuy'?maxBuyAvail(s, ($('#op')&&OTYPES[orderType].price&&$('#placeB'))?+$('#op').value:s.price):v==='all'?(S.holdings[s.sym]?.qty||0):v; updEst(); return; }
+  if(t.id==='buyB'){ trade(sheetSym,+$('#q').value,'buy'); return; }
+  if(t.id==='sellB'){ const hh=S.holdings[sheetSym], q=Math.floor(+$('#q').value||0); if(hh && ensureLots(hh).lots.filter(l=>l.left).length>1){ openLotsPicker(sheetSym,q); return; } trade(sheetSym,q,'sell'); return; }
+  const a=d.act;
+  if(a==='close') closeSheet();
+  if(a==='ack'){ S.queue.shift(); save(); render(); if(S.over) showEnd(); else showQueue(); }
+  if(a==='howto') showHowTo();
+  if(a==='startplay'){ S.intro=false; save(); closeSheet(); }
+  if(a==='reset') confirmReset();
+  if(a==='storyskip'){ showStory(STORY.length-1); }
+  if(a==='tutstart'){ finishStory(); closeSheet(); startTutorial(); }
+  if(a==='tutno'){ finishStory(); closeSheet(); render(); toast('Tap 🔔 Open the market when you’re ready!'); }
+  if(a==='story'){ showStory(0); }
+  if(a==='tutorial'){ closeSheet(); startTutorial(); }
+  if(a==='newgame'){ stopTimer(); newGame(); morningRead(); S.intro=false; S.storySeen=true; tab='market'; closeSheet(); render(); toast('New game — good luck!'); }
+  if(a==='read') freeRead();
+  if(a==='read2'){ freeRead(true); sfx('click'); }
+  if(a==='dinner') dinner();
+  if(a==='bet'){ closeSheet(); S.queue.push({type:'event',id:'bet',d:EVENTS.bet.data()}); save(); showQueue(); }
+  if(a==='lastrep'){ showReport(S.lastReport,false); }
+  if(a==='lastweek'){ showWeek(S.lastWeek,false); }
+  if(a==='togrep'){ S.showReport=S.showReport===false; save(); render(); }
+  if(a==='autopause'){ S.autoPause=S.autoPause===false; save(); render(); }
+  if(a==='sound'){ S.sound=!S.sound; save(); render(); sfx('click'); }
+});
+// touch swipe on the trade screen
+(()=>{ let x0=0,y0=0,t0=0;
+  $('#sheet').addEventListener('touchstart',e=>{ const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now(); },{passive:true});
+  $('#sheet').addEventListener('touchend',e=>{
+    if(!sheetSym||tutOn||e.target.closest('input,select,.chips,.otypes')) return;
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+    if(Math.abs(dx)>60 && Math.abs(dy)<Math.abs(dx)*.6 && Date.now()-t0<800) swipeTo(dx<0?1:-1);
+  },{passive:true});
+  document.addEventListener('keydown',e=>{ if(!sheetSym||e.target.closest('input')) return; if(e.key==='ArrowRight') swipeTo(1); if(e.key==='ArrowLeft') swipeTo(-1); });
+})();
+document.addEventListener('input',e=>{ if(e.target.id==='q'||e.target.id==='op') updEst(); if(e.target.classList.contains('pk')) updPicker(); });
+document.addEventListener('change',e=>{ if(e.target.id==='olot') orderLot=e.target.value; });
+$('#openBtn').addEventListener('click',()=>{ if(S.queue.length) showQueue(); else if(isOpen()) skipToClose(); else goMidday(); });
+$('#ffBtn').addEventListener('click',fastForward);
+$('#pauseBtn').addEventListener('click',()=>{ paused=!paused; S.breakPaused=false; render(); });
+$('#speedBtn').addEventListener('click',()=>{ speed=speed===1?2:speed===2?4:1; if(isOpen()) startTimer(); controls(); });
+$('#skipBtn').addEventListener('click',skipToClose);
+
+// ================= BOOT =================
+if(!load()) newGame();
+morningRead();
+// keep each company's market sensitivity in line with its profile (older saves used random values)
+S.stocks.forEach(s=>{ const P=PROFILES[s.sym]; if(P && !s.betaFixed){ s.beta=P.beta*rnd(.9,1.1); s.betaFixed=true; } });
+// switch saves from the old 1,095-day count to trading days
+if(!S.cal){
+  const cv=d=>typeof d==='number'&&d>=0?tradingIndexByCal(d):d;
+  S.day=cv(S.day); ['martyBan','lastEvent','tipDay','readDay','dinnerDay'].forEach(k=>S[k]=cv(S[k]));
+  (S.pending||[]).forEach(p=>p.day=cv(p.day)); (S.log||[]).forEach(l=>l.day=cv(l.day));
+  if(S.seen&&S.seen.galaDay) S.seen.galaDay=cv(S.seen.galaDay);
+  Object.values(S.holdings||{}).forEach(hh=>{ (hh.lots||[]).forEach(l=>l.day=cv(l.day)); (hh.sells||[]).forEach(x=>x.day=cv(x.day)); });
+  if(S.lastReport) S.lastReport.day=cv(S.lastReport.day);
+  S.cal=true;
+}
+// v7: scaled-down endgame (island $8M); update unowned listings
+if(!S.v8){ (S.props||[]).forEach(p=>{ const d=PROPS.find(x=>x.id===p.id); if(d && !p.owned && (p.id==='lake'||p.id==='estate')) p.value=d.price; }); S.v7=true; S.v8=true; }
+// v5 rebalance: calmer daily swings and a real upward drift for games saved before the update
+S.stocks.forEach(s=>{ if(!s.v9){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.v9=true; s.v6=true; s.v5=true; } });
+S.stocks.forEach(s=>{ if(!s.v6){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.drift=rnd(.0006,.0013); s.v6=true; s.v5=true; } });
+S.stocks.forEach(s=>{ if(!s.v5){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.drift=rnd(.0006,.0013); s.v5=true; } });
+render();
+if(isOpen()){ paused=true; while(S.t<MID) stepTick(); filledSyms.clear(); save(); render(); }
+if(!S.storySeen){ paused=true; showStory(0); } else if(S.over) showEnd(); else if(S.queue.length) showQueue();
+
+</script>
+</body>
+</html>
