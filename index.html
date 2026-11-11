@@ -542,11 +542,11 @@ function ringBell(){
   if(!S||!S.sound) return;
   try{
     AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-    const ctx=AC, t0=ctx.currentTime+0.02, strikeFor=0.9, vol=0.036, base=850+Math.random()*30;
+    const ctx=AC, t0=ctx.currentTime+0.02, strikeFor=0.9, vol=0.04, base=510+Math.random()*20;
     // signal path: bus -> highpass -> lowpass -> (dry + hall echo) -> out
     const out=ctx.createGain(); out.gain.value=vol; out.connect(ctx.destination);
     const bus=ctx.createGain(), hp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter();
-    hp.type='highpass'; hp.frequency.value=280; lp.type='lowpass'; lp.frequency.value=7500;
+    hp.type='highpass'; hp.frequency.value=160; lp.type='lowpass'; lp.frequency.value=5000;
     const dry=ctx.createGain(); dry.gain.value=1; const wet=ctx.createGain(); wet.gain.value=0.32;
     const conv=ctx.createConvolver(); conv.buffer=hallBuffer(ctx);
     bus.connect(hp).connect(lp); lp.connect(dry).connect(out); lp.connect(conv).connect(wet).connect(out);
@@ -565,7 +565,7 @@ function ringBell(){
     // a soft metallic tick for each hammer strike
     const len=Math.floor(ctx.sampleRate*0.005), nb=ctx.createBuffer(1,len,ctx.sampleRate), nd=nb.getChannelData(0);
     for(let i=0;i<len;i++) nd[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);
-    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=3600; bp.Q.value=1.6; bp.connect(bus);
+    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=1.4; bp.connect(bus);
     strikes.forEach(ts=>{ const n=ctx.createBufferSource(), ng=ctx.createGain(); ng.gain.value=0.18+Math.random()*0.12; n.buffer=nb; n.connect(ng).connect(bp); n.start(ts); });
   }catch(e){}
 }
