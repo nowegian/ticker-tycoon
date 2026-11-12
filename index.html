@@ -291,18 +291,18 @@ ul.how{padding-left:18px;margin:8px 0;font-size:14px;line-height:1.5;color:#cfe0
 <script>
 // ================= DATA =================
 const COMPANIES = [
-  ['NOVA','Novatek Systems','Tech',42,0.0179],
-  ['BYTE','Bytewave','Tech',18,0.0257],
-  ['PTRX','Petrolux Energy','Energy',55,0.0137],
-  ['SOLR','Sunfield Solar','Energy',9,0.0315],
-  ['GRUB','GrubHaus Foods','Food',31,0.01],
-  ['CRNR','Cornerstone Farms','Food',22,0.0126],
-  ['MEDX','Medixa Pharma','Health',64,0.0215],
-  ['VITA','Vitacore Labs','Health',12,0.0294],
-  ['ZOOM','Zoomline Motors','Auto',38,0.0168],
-  ['VOLT','Voltcar','Auto',6,0.0357],
-  ['BNKR','Bankrest Financial','Finance',47,0.0116],
-  ['GLDN','Goldenreach Mining','Mining',15,0.0215],
+  ['NOVA','Novatek Systems','Tech',42,0.0125],
+  ['BYTE','Bytewave','Tech',18,0.018],
+  ['PTRX','Petrolux Energy','Energy',55,0.0096],
+  ['SOLR','Sunfield Solar','Energy',9,0.0221],
+  ['GRUB','GrubHaus Foods','Food',31,0.007],
+  ['CRNR','Cornerstone Farms','Food',22,0.0088],
+  ['MEDX','Medixa Pharma','Health',64,0.015],
+  ['VITA','Vitacore Labs','Health',12,0.0206],
+  ['ZOOM','Zoomline Motors','Auto',38,0.0118],
+  ['VOLT','Voltcar','Auto',6,0.025],
+  ['BNKR','Bankrest Financial','Finance',47,0.0081],
+  ['GLDN','Goldenreach Mining','Mining',15,0.015],
 ];
 const NPCS = {
   marty:   {name:'Marty Kessler', role:'Stockbroker',           em:'🧔', bg:'#3b6b4f'},
@@ -324,15 +324,15 @@ const GOALS = [
   {id:'sports',type:'buy', em:'🏎️', name:'Sports Car',        cost:120000,   due:540,  upkeep:1500,  by:'whitlock', desc:'“Edna drove a roadster until she was 90.”'},
   {id:'nw2m',  type:'nw',  em:'💰', name:'One Million',       target:1000000,due:730,  by:'whitlock', desc:'Net worth of $1M by the end of year two.'},
   {id:'lake',  type:'prop',prop:'lake', em:'🏡', name:'The Lake House', due:820, by:'ray', desc:'Buy the Lake House from Ray — Edna’s old summer place.'},
-  {id:'yacht', type:'buy', em:'⛵', name:'Yacht',             cost:400000,   due:900,  upkeep:3500, by:'jordan',   desc:'“Imagine our honeymoon on the water.”'},
-  {id:'nw8m',  type:'nw',  em:'🏦', name:'Two Million',       target:2000000,due:1000, by:'whitlock', desc:'Net worth of $2M.'},
-  {id:'island',type:'buy', em:'🏝️', name:'Private Island',    cost:5000000,  due:1094, upkeep:0,     by:'whitlock', desc:'Edna’s final condition. Buy it debt-free, before Victor does.', final:true},
+  {id:'yacht', type:'buy', em:'⛵', name:'Yacht',             cost:300000,   due:900,  upkeep:2500, by:'jordan',   desc:'“Imagine our honeymoon on the water.”'},
+  {id:'nw8m',  type:'nw',  em:'🏦', name:'One and a Half Million', target:1500000,due:1000, by:'whitlock', desc:'Net worth of $1.5M.'},
+  {id:'island',type:'buy', em:'🏝️', name:'Private Island',    cost:4000000,  due:1094, upkeep:0,     by:'whitlock', desc:'Edna’s final condition. Buy it debt-free, before Victor does.', final:true},
 ];
 const PROPS = [
   {id:'bungalow',em:'🏠', name:'Maple St. Bungalow',  price:250000},
   {id:'condo',   em:'🏢', name:'Riverside Condo',     price:450000},
   {id:'house',   em:'🏘️', name:'Hillcrest Family Home',price:800000},
-  {id:'lake',    em:'🏡', name:'The Lake House',      price:900000},
+  {id:'lake',    em:'🏡', name:'The Lake House',      price:600000},
   {id:'estate',  em:'🏰', name:'Bayview Estate',      price:2500000},
 ];
 const START_CASH=100000, RENT=1800, LIVING=1000, COMMISSION=10, MAX_STRIKES=3;
@@ -379,7 +379,7 @@ const tdays = n => `${n} trading day${n===1?'':'s'}`;
 GOALS.forEach(g=>{ g.dueCal=g.due; g.due=tradingIndexByCal(g.due); });
 
 const LOAN_RATE=.0125, CASH_DEBT_RATE=.02, DOWN=.20, CLOSING=.02, MORT_RATE=.005, MORT_PAY=.0065;
-const TICKS=78, MID=39, TICK_MS=900, ISLAND=5000000;
+const TICKS=78, MID=39, TICK_MS=900, ISLAND=4000000;
 
 const SECTOR_NEWS = {
   Tech:   {pos:['Chip shortage eases; tech makers expect a boom','Office software spending surges nationwide'], neg:['New data-privacy law threatens tech profits','Tech hiring freeze spreads across the valley']},
@@ -589,12 +589,12 @@ function newGame(){
     day:0, cash:START_CASH, mood:0, holdings:{}, log:[], goals:{}, strikes:0, loan:0, items:[],
     props: PROPS.map(p=>({id:p.id,value:p.price,loan:0,pay:0,owned:false})),
     hearts:70, readDay:-1, tipDay:-1, tip:null, read:null, dinnerDay:-99, intro:true, over:null, unread:{whitlock:true,victor:true},
-    cal:true, v7:true, v8:true, phase:'closed', t:0, breaking:[], breakQ:[], queue:[], pending:[], seen:{}, lastEvent:0, tipsBought:0, orders:[], martyBan:-1, goodwill:0, sound:true,
+    cal:true, v7:true, v8:true, v11:true, phase:'closed', t:0, breaking:[], breakQ:[], queue:[], pending:[], seen:{}, lastEvent:0, tipsBought:0, orders:[], martyBan:-1, goodwill:0, sound:true,
     rival:{nw:START_CASH, lead:null}, dayStartNW:START_CASH,
     stocks: COMPANIES.map(([sym,name,sector,p,vol])=>{
       const hist=[]; let x=p*rnd(.85,1.1);
       for(let i=0;i<40;i++){ x*=1+gauss()*vol*.8; x=Math.max(.5,x); hist.push(+x.toFixed(2)); }
-      return {v5:true,v6:true,v9:true,sym,name,sector,vol,price:hist[hist.length-1],prev:hist[hist.length-1],fair:p*rnd(.85,1.15),beta:(PROFILES[sym]?.beta||1)*rnd(.9,1.1),betaFixed:true,drift:rnd(.0008,.0016),hist,path:null};
+      return {v5:true,v6:true,v9:true,v10:true,sym,name,sector,vol,price:hist[hist.length-1],prev:hist[hist.length-1],fair:p*rnd(.85,1.15),beta:(PROFILES[sym]?.beta||1)*rnd(.9,1.1),betaFixed:true,drift:rnd(.0008,.0016),hist,path:null};
     }),
   };
   S.news=makeNews(); S.next=makeNews();
@@ -639,14 +639,14 @@ function finishNews(it){
   return it;
 }
 function makeNews(){
-  const out=[]; const n=Math.random()<.25?2:(Math.random()<.6?3:4); const used=new Set();
+  const out=[]; const n=Math.random()<.35?0:(Math.random()<.6?1:2); const used=new Set();
   const fresh=()=>{ let s; do{ s=pick(S.stocks);}while(used.has(s.sym)); used.add(s.sym); return s; };
   for(let i=0;i<n;i++){
     const r=Math.random(), sign=Math.random()<.5?1:-1; let it;
-    if(r<.48){ const s=fresh(), tp=pick(sign>0?CO_POS:CO_NEG); it={kind:'co',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.035,.12),rel:.72}; }
-    else if(r<.64){ const s=fresh(), tp=pick(sign>0?RUMOR_POS:RUMOR_NEG); it={kind:'rumor',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.05,.14),rel:.55}; }
-    else if(r<.88){ const sec=pick(Object.keys(SECTOR_NEWS)), tp=pick(sign>0?SECTOR_NEWS[sec].pos:SECTOR_NEWS[sec].neg); it={kind:'sector',sector:sec,tpl:tp,text:tp,sign,mag:rnd(.02,.065),rel:.7}; }
-    else { const tp=pick(sign>0?MKT_POS:MKT_NEG); it={kind:'mkt',tpl:tp,text:tp,sign,mag:rnd(.015,.045),rel:.7}; }
+    if(r<.52){ const s=fresh(), tp=pick(sign>0?CO_POS:CO_NEG); it={kind:'co',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.075,.26),rel:.72}; }
+    else if(r<.66){ const s=fresh(), tp=pick(sign>0?RUMOR_POS:RUMOR_NEG); it={kind:'rumor',sym:s.sym,tpl:tp,text:fillNews(tp,s),sign,mag:rnd(.1,.28),rel:.55}; }
+    else if(r<.93){ const sec=pick(Object.keys(SECTOR_NEWS)), tp=pick(sign>0?SECTOR_NEWS[sec].pos:SECTOR_NEWS[sec].neg); it={kind:'sector',sector:sec,tpl:tp,text:tp,sign,mag:rnd(.04,.13),rel:.7}; }
+    else { const tp=pick(sign>0?MKT_POS:MKT_NEG); it={kind:'mkt',tpl:tp,text:tp,sign,mag:rnd(.025,.07),rel:.7}; }
     out.push(finishNews(it));
   }
   return out;
@@ -669,9 +669,9 @@ function buildPath(s, target){
   for(let i=1;i<=TICKS;i++) s.path.push(Math.max(.5,+(s.price*Math.exp(inc[i-1]-end*i/TICKS+lt*i/TICKS)).toFixed(2)));
 }
 function makeBreak(){
-  if(Math.random()<.14){ const f=pick(FLASH), b={kind:'mkt',text:f.t,sign:f.s,mag:rnd(.035,.07),rel:.5}; b.holds=Math.random()<b.rel; return writeArticle(b,f.t,null,'brk'); }
+  if(Math.random()<.04){ const f=pick(FLASH), b={kind:'mkt',text:f.t,sign:f.s,mag:rnd(.035,.07),rel:.5}; b.holds=Math.random()<b.rel; return writeArticle(b,f.t,null,'brk'); }
   const s=pick(S.stocks), sign=Math.random()<.5?1:-1;
-  const tp=pick(sign>0?BREAK_POS:BREAK_NEG), b={kind:'co',sym:s.sym,text:fillNews(tp,s),sign,mag:rnd(.04,.1),rel:.65}; b.holds=Math.random()<b.rel; return writeArticle(b,tp,s,'brk');
+  const tp=pick(sign>0?BREAK_POS:BREAK_NEG), b={kind:'co',sym:s.sym,text:fillNews(tp,s),sign,mag:rnd(.07,.16),rel:.65}; b.holds=Math.random()<b.rel; return writeArticle(b,tp,s,'brk');
 }
 function openMarket(){
   if(isOpen()||S.over) return;
@@ -684,12 +684,12 @@ function openMarket(){
   S.news.forEach(n=>{ n.moves={}; S.stocks.forEach(s=>{ if(!hits(n,s)) return; const e=n.pre*weight(n,s)*rnd(.7,1.3); s.price=Math.max(.5,+(s.price*(1+e)).toFixed(2)); n.moves[s.sym]=e; }); });
   // where each stock will close (before any breaking news)
   S.stocks.forEach(s=>{
-    let r = s.drift + S.mood*.005 + gauss()*s.vol*.8 - 0.02*Math.log(s.price/s.fair);
+    let r = s.drift + S.mood*.003 + gauss()*s.vol*.8 - 0.026*Math.log(s.price/s.fair);
     S.news.forEach(n=>{ if(!hits(n,s)) return; const w=weight(n,s); r+=(n.real-n.pre)*w; s.fair*=1+n.real*w*.8; });
     s.fair=Math.max(1,s.fair*(1+s.drift)*Math.exp(gauss()*s.vol*.1));
     buildPath(s, Math.max(.5,s.price*Math.exp(clamp(r,-.45,.45))));
   });
-  const k=Math.random()<.55?1:(Math.random()<.35?2:0);
+  const k=Math.random()<.25?1:0;
   S.breakQ=[]; for(let i=0;i<k;i++) S.breakQ.push({t:Math.floor(rnd(4,MID-1)),b:makeBreak()});
   S.breaking=[]; S.t=0; S.phase='open'; paused=false; S.breakPaused=false;
   runOrders(true);
@@ -899,7 +899,7 @@ function checkGoals(){
 // ================= RIVAL =================
 function updateRival(avgRet){
   const R=S.rival, me=netWorth();
-  const aggressive = me > R.nw*1.3 ? 1.6 : 1;           // he takes bigger risks when he's losing
+  const aggressive = me > R.nw*1.3 ? 1.2 : 1;           // he takes bigger risks when he's losing
   R.nw = Math.max(20000, R.nw*(1 + avgRet*.6 + .0031 + gauss()*.015*aggressive));
   const lead = me>=R.nw ? 'me' : 'him';
   if(R.lead && lead!==R.lead){
@@ -1285,6 +1285,7 @@ const tipCost = () => Math.max(1000, Math.round(netWorth()*0.015/100)*100);
 function buyTip(stay){
   if(S.tipDay===S.day||S.martyBan>S.day) return; const c=tipCost(); if(S.cash<c) return toast('Not enough cash');
   S.cash-=c; S.tipDay=S.day; S.tipsBought++;
+  if(!S.next.length){ S.tip='Nothing on the wire for tomorrow, kid.'; S.tipShort=null; save(); return; }
   const cands=S.next.filter(n=>n.kind!=='mkt'); const n=cands.length?pick(cands):S.next[0];
   const dir=Math.random()<0.62?n.sign:-n.sign;
   const subj = n.sym? `<b>${n.sym}</b>` : n.sector? `<b>${n.sector}</b> stocks` : `<b>the whole market</b>`;
@@ -1396,6 +1397,7 @@ function viewMarket(){
       let mv='';
       if(open && n.moves){ const m=n.sym?n.moves[n.sym]:Object.values(n.moves).reduce((a,b)=>a+b,0)/Math.max(1,Object.keys(n.moves).length); mv=`<div class="mv ${cls(m)}">${n.sym||'Avg'} ${pct(m)} at the open</div>`; }
       return `<div class="headline" data-art="n${S.news.indexOf(n)}">${newsTag(n)}<div><div class="txt">${esc(n.text)}</div>${mv}</div></div>`}).join('')}
+    ${S.news.length?'':'<div class="headline" style="cursor:default"><div class="txt" style="font-weight:400;font-style:italic">A quiet morning. No major stories today.</div></div>'}
     ${open?'':'<div class="closed-note">🌅 Pre-market: trades you make now fill at the 9:30 opening price.</div>'}
   </div>
   <h2>Pinecrest Stock Exchange ${open?'<span style="color:var(--green)">● MIDDAY 12:45</span>':'<span style="color:var(--dim)">· PRE-MARKET</span>'}</h2>
@@ -1789,7 +1791,7 @@ const STORY=[
   {who:'whitlock', text:'Edna built her fortune trading on the <b>Pinecrest Stock Exchange</b>, and it is considerable. Her will, however, is… unusual.'},
   {who:'whitlock', text:'She has left you <b>$100,000</b>. Not as a gift but as a test. Grow it, live well, and prove you can handle money, and you inherit her <b>entire estate</b>.'},
   {who:'whitlock', text:'Edna wrote a list of <b>13 goals</b>: a sharp suit, a home, a car, a ring, all the way up to a <b>private island</b>. Each has a deadline. Miss <b>three</b> deadlines and the will is void. Buy the island within <b>three years</b>, free of debt, and everything is yours.'},
-  {who:'victor', text:'Not so fast, cousin. Aunt Edna gave <b>me</b> the same $100K and the same deal. If my fortune hits <b>$5 million</b> before you buy that island, I buy it first and you get <b>nothing</b>. 😈'},
+  {who:'victor', text:'Not so fast, cousin. Aunt Edna gave <b>me</b> the same $100K and the same deal. If my fortune hits <b>$4 million</b> before you buy that island, I buy it first and you get <b>nothing</b>. 😈'},
   {who:'whitlock', text:'…Yes. Your cousin Victor. Do keep an eye on him. Now, you’ll want some help. Edna kept a few people she trusted.'},
   {who:'marty', text:'Marty Kessler, stockbroker. I give you a <b>free read</b> on the market once a day: which stocks look cheap, which look overheated.'},
   {who:'delia', text:'Delia Park, Bankrest. When you want more money to invest, I can lend you up to <b>half your net worth</b>. Interest is due every month, so don’t borrow what you can’t pay back.'},
@@ -1820,7 +1822,7 @@ function tutTrade(mode, otype){
 const TUT=[
   {sel:'.stats', setup:()=>{ closeSheet(); tab='market'; render(); window.scrollTo(0,0); },
    text:'<b>Cash</b> is money you can spend right now. <b>Net worth</b> is everything you own minus everything you owe. That’s your score. <b>Strikes</b> are missed deadlines. Three and you lose.'},
-  {sel:'.race', text:'Your race against Cousin Victor. If his fortune reaches $5M before you buy the island, he wins. Tap this anytime to visit him.'},
+  {sel:'.race', text:'Your race against Cousin Victor. If his fortune reaches $4M before you buy the island, he wins. Tap this anytime to visit him.'},
   {sel:'.due', text:'Your next deadline from Edna’s list. It turns red when it’s due within two weeks. Tap it to see every goal.'},
   {sel:'.paper', text:'The <b>Morning Edition</b>. These headlines move prices when the market opens. Tap any headline to read the article. <b>Confident</b> articles usually hold up; <b>doubtful</b> ones often fall apart. Rumors are a coin flip.'},
   {sel:'.card .row', text:'Each row is a company: its ticker symbol, its last 30 trading days, its price and today’s change. Tap a company to trade it. Let’s open one.'},
@@ -1966,8 +1968,9 @@ if(!S.cal){
   S.cal=true;
 }
 // v7: scaled-down endgame (island $8M); update unowned listings
-if(!S.v8){ (S.props||[]).forEach(p=>{ const d=PROPS.find(x=>x.id===p.id); if(d && !p.owned && (p.id==='lake'||p.id==='estate')) p.value=d.price; }); S.v7=true; S.v8=true; }
+if(!S.v11){ (S.props||[]).forEach(p=>{ const d=PROPS.find(x=>x.id===p.id); if(d && !p.owned && (p.id==='lake'||p.id==='estate')) p.value=d.price; }); S.v7=true; S.v8=true; S.v11=true; }
 // v5 rebalance: calmer daily swings and a real upward drift for games saved before the update
+S.stocks.forEach(s=>{ if(!s.v10){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.v10=true; s.v9=true; s.v6=true; s.v5=true; } });
 S.stocks.forEach(s=>{ if(!s.v9){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.v9=true; s.v6=true; s.v5=true; } });
 S.stocks.forEach(s=>{ if(!s.v6){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.drift=rnd(.0006,.0013); s.v6=true; s.v5=true; } });
 S.stocks.forEach(s=>{ if(!s.v5){ const c=COMPANIES.find(x=>x[0]===s.sym); if(c) s.vol=c[4]; s.drift=rnd(.0006,.0013); s.v5=true; } });
