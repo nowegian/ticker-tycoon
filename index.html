@@ -98,7 +98,6 @@ nav .dot{position:absolute;top:7px;left:calc(50% + 8px);width:8px;height:8px;bor
 .prop .pt{flex:1;min-width:0;font-size:13px}
 .prop .pt b{display:block;font-size:14px}
 .prop .btn{padding:9px 12px;font-size:13px}
-.hearts{font-size:15px;letter-spacing:2px}
 /* sheet */
 .scrim{position:fixed;inset:0;background:#000a;z-index:20;display:none;align-items:flex-end;justify-content:center}
 .scrim.show{display:flex}
@@ -240,11 +239,6 @@ ul.how{padding-left:18px;margin:8px 0;font-size:14px;line-height:1.5;color:#cfe0
 .cbar i{display:block;height:100%;background:var(--green);width:0}
 #live button{min-width:48px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;font-size:16px;font-family:var(--mono);font-weight:600;cursor:pointer}
 #live #pauseBtn{background:var(--gold);color:#241a02;border:none;font-size:18px}
-.race{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-top:8px;cursor:pointer}
-.race .me,.race .vic{font-family:var(--mono);font-size:14px;font-weight:600}
-.race .vic{text-align:right}
-.race .lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-family:var(--sans);font-weight:500}
-.race .vs{font-family:var(--pix);font-size:9px;color:var(--dim)}
 .brk{background:#2e1418;border:1px solid #6a2430;border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer;animation:flash .6s ease-out}
 .brk .h{font-family:var(--mono);font-size:10px;color:var(--red);font-weight:600;letter-spacing:.06em}
 .brk .tx{font-size:14px;font-weight:600;margin-top:3px;line-height:1.3}
@@ -254,6 +248,18 @@ ul.how{padding-left:18px;margin:8px 0;font-size:14px;line-height:1.5;color:#cfe0
 .evt-title{font-family:var(--pix);font-size:11px;color:var(--gold);line-height:1.6;margin:12px 0 2px}
 .confetti{position:fixed;top:-20px;z-index:50;pointer-events:none;font-size:20px;animation:fall 1.8s ease-in forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.6}}
+.advt{width:100%;background:none;border:1px dashed var(--line);color:var(--dim);border-radius:10px;padding:10px;margin-top:10px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
+.advbox{border:1px solid var(--line);border-radius:12px;padding:4px 10px 10px;margin-top:10px;background:#0d1611}
+.hint{display:flex;gap:10px;align-items:center;background:#12202b;border:1px solid #2d5a7a;border-radius:12px;padding:10px 12px;margin-top:8px}
+.hint .hx{font-size:20px}.hint .ht{flex:1;font-size:13px;line-height:1.4}.hint .btn{padding:7px 11px;font-size:12px}
+.today{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.today .tt{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.today .tt button{background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer}
+.today .ck{font-size:13.5px;padding:3px 0}.today .ck.done{color:var(--dim);text-decoration:line-through}
+.sb{display:inline-block;font-family:var(--sans);font-size:11px;font-weight:700;margin-top:4px;padding:1px 8px;border-radius:9px}
+.sb.ok{background:#d6efdc;color:#1d5a32}.sb.sh{background:#f7e2b0;color:#7a4e08}
+.newb{font-size:9px;font-weight:700;background:var(--gold);color:#1a1405;border-radius:6px;padding:1px 5px;vertical-align:2px}
+.seeall{width:100%;margin-top:8px}
 .tclosed{font-size:12px;color:var(--gold);text-align:center;margin:4px 0 8px}
 </style>
 </head>
@@ -309,24 +315,25 @@ const NPCS = {
   delia:   {name:'Delia Park',    role:'Loan officer, Bankrest', em:'👩‍💼', bg:'#3d5a80'},
   ray:     {name:'Ray Alvarez',   role:'Real estate agent',      em:'🤠', bg:'#8a5a2b'},
   whitlock:{name:'Mr. Whitlock',  role:'Aunt Edna’s lawyer',     em:'👴', bg:'#5b4a6e'},
-  jordan:  {name:'Jordan',        role:'Your partner',           em:'💞', bg:'#8a3b5a'},
-  victor:  {name:'Cousin Victor', role:'Your rival for the inheritance', em:'🦹', bg:'#6b2b2b'},
+  jordan:  {name:'Jordan',        role:'An old friend',          em:'💞', bg:'#8a3b5a'},   // kept only so very old saves still load
+  victor:  {name:'Victor',        role:'Edna’s nephew',          em:'🦹', bg:'#6b2b2b'},
+  gus:     {name:'Sal',           role:'Your mechanic',          em:'🧰', bg:'#4a4f55'},
   dev:     {name:'Dev',           role:'Your old college roommate', em:'🧑‍💻', bg:'#2b5a6b'},
 };
 const GOALS = [
   {id:'suit',  type:'buy', em:'👔', name:'Sharp Suit',        cost:3000,     due:14,   upkeep:0,     by:'whitlock', desc:'“Edna insisted you dress the part.”'},
   {id:'nw150', type:'nw',  em:'📈', name:'Grow to $125K',     target:125000, due:60,   by:'whitlock', desc:'Prove you can grow her gift by 25%.'},
-  {id:'gift',  type:'buy', em:'💐', name:'Anniversary Gift',  cost:10000,    due:90,   upkeep:0,     by:'jordan',   desc:'“Our anniversary is coming up… just saying.”'},
+  {id:'gift',  type:'buy', em:'🎁', name:'A Thank-You Gift',  cost:10000,    due:90,   upkeep:0,     by:'whitlock', desc:'“Send something lovely to Rosa, who looked after Edna for thirty years.”'},
   {id:'home',  type:'home',em:'🏠', name:'Own a Home',        due:180,  by:'ray',      desc:'Buy any property from Ray. Ends your rent.'},
-  {id:'car',   type:'buy', em:'🚗', name:'New Car',           cost:30000,    due:240,  upkeep:300,   by:'jordan',   desc:'“The bus is fine. Said no one ever.”'},
+  {id:'car',   type:'buy', em:'🚗', name:'New Car',           cost:30000,    due:240,  upkeep:300,   by:'whitlock', desc:'“You can’t take the bus to the Exchange forever.”'},
   {id:'nw500', type:'nw',  em:'💵', name:'Quarter Million',   target:250000, due:365,  by:'whitlock', desc:'Net worth of $250K by the end of year one.'},
-  {id:'ring',  type:'buy', em:'💍', name:'Engagement Ring',   cost:40000,    due:450,  upkeep:0,     by:'jordan',   desc:'Time to pop the question.'},
+  {id:'ring',  type:'buy', em:'🖼️', name:'Edna’s Portrait',   cost:40000,    due:450,  upkeep:0,     by:'whitlock', desc:'Buy back the portrait of Edna that was sold at auction.'},
   {id:'sports',type:'buy', em:'🏎️', name:'Sports Car',        cost:120000,   due:540,  upkeep:1500,  by:'whitlock', desc:'“Edna drove a roadster until she was 90.”'},
   {id:'nw2m',  type:'nw',  em:'💰', name:'One Million',       target:1000000,due:730,  by:'whitlock', desc:'Net worth of $1M by the end of year two.'},
   {id:'lake',  type:'prop',prop:'lake', em:'🏡', name:'The Lake House', due:820, by:'ray', desc:'Buy the Lake House from Ray — Edna’s old summer place.'},
-  {id:'yacht', type:'buy', em:'⛵', name:'Yacht',             cost:300000,   due:900,  upkeep:2500, by:'jordan',   desc:'“Imagine our honeymoon on the water.”'},
+  {id:'yacht', type:'buy', em:'⛵', name:'Yacht',             cost:300000,   due:900,  upkeep:2500, by:'whitlock', desc:'“Edna always dreamed of sailing around the bay.”'},
   {id:'nw8m',  type:'nw',  em:'🏦', name:'One and a Half Million', target:1500000,due:1000, by:'whitlock', desc:'Net worth of $1.5M.'},
-  {id:'island',type:'buy', em:'🏝️', name:'Private Island',    cost:4000000,  due:1094, upkeep:0,     by:'whitlock', desc:'Edna’s final condition. Buy it debt-free, before Victor does.', final:true},
+  {id:'island',type:'buy', em:'🏝️', name:'Private Island',    cost:4000000,  due:1094, upkeep:0,     by:'whitlock', desc:'Edna’s final condition. Buy it debt-free and the whole estate is yours.', final:true},
 ];
 const PROPS = [
   {id:'bungalow',em:'🏠', name:'Maple St. Bungalow',  price:250000},
@@ -399,10 +406,6 @@ const MKT_NEG = ['Recession fears grip the Exchange','Inflation runs hotter than
 const BREAK_POS = ['{n} confirms takeover offer at a big premium','{n} wins approval for its flagship product','{n} raises full-year forecast','Famous investor reveals huge stake in {n}'];
 const BREAK_NEG = ['Trading halted briefly in {n} after fraud report','{n} plant fire halts production','{n} loses its biggest customer','Regulators raid {n} headquarters'];
 const FLASH = [{t:'Flash crash! Computer-trading glitch rocks the Exchange',s:-1},{t:'Surprise mid-day rate cut sends stocks flying',s:1},{t:'Rumor of a bank failure sparks a sell-off',s:-1}];
-const VICTOR_TAUNTS = {
-  ahead:['Still behind me, cousin? Aunt Edna always said I was the clever one.','I made more before lunch than you made all week.','Enjoy the bus. I’ll wave from the island.'],
-  behind:['Beginner’s luck. It runs out.','Don’t get comfortable. I’m just warming up.','Enjoy it while it lasts, cousin.'],
-};
 
 // ---- article copy: one detail sentence per headline, then a tone line ----
 const DETAILS = {
@@ -487,14 +490,14 @@ function fillNews(tpl, s){
     .replace(/\$\$/g,'$');
 }
 // tone hints at whether the story will hold up: right about 2 times in 3
-function toneLine(kind, holds){
-  const sure = Math.random()<(holds?.84:.16);
+function toneLine(kind, holds, sure){
   const k = kind==='rumor'?'rumor':kind==='co'?'co':kind==='brk'?'brk':'wide';
   return pick(TONE[sure?'sure':'shaky'][k]);
 }
 function writeArticle(it, tpl, s, kind){
   const holds = it.real!==undefined ? Math.sign(it.real)===it.sign : it.holds;
-  it.blurb = fillNews(DETAILS[tpl]||'No further details were available at press time.', s) + ' ' + toneLine(kind||it.kind, holds);
+  it.sure = Math.random()<(holds?.84:.16);   // the article's tone; shown as ✅ Solid / ⚠️ Shaky
+  it.blurb = fillNews(DETAILS[tpl]||'No further details were available at press time.', s) + ' ' + toneLine(kind||it.kind, holds, it.sure);
   return it;
 }
 
@@ -581,16 +584,16 @@ function confetti(){
 
 // ================= STATE =================
 let ffing=false, quietMorning=false;
-let tradeMode='now', orderType='obuy', orderLot='';
+let tradeMode='now', orderType='obuy', orderLot='', advOpen=false, goalsAll=false;
 let S, tab='market', sheetSym=null, sheetNpc=null, timer=null, paused=false, speed=1, skipping=false;
 
 function newGame(){
   S = {
     day:0, cash:START_CASH, mood:0, holdings:{}, log:[], goals:{}, strikes:0, loan:0, items:[],
     props: PROPS.map(p=>({id:p.id,value:p.price,loan:0,pay:0,owned:false})),
-    hearts:70, readDay:-1, tipDay:-1, tip:null, read:null, dinnerDay:-99, intro:true, over:null, unread:{whitlock:true,victor:true},
+    readDay:-1, tipDay:-1, tip:null, read:null, intro:true, over:null, unread:{whitlock:true}, met:{marty:true}, tipsSeen:{}, hintQ:[],
     cal:true, v7:true, v8:true, v11:true, phase:'closed', t:0, breaking:[], breakQ:[], queue:[], pending:[], seen:{}, lastEvent:0, tipsBought:0, orders:[], martyBan:-1, goodwill:0, sound:true,
-    rival:{nw:START_CASH, lead:null}, dayStartNW:START_CASH,
+    dayStartNW:START_CASH,
     stocks: COMPANIES.map(([sym,name,sector,p,vol])=>{
       const hist=[]; let x=p*rnd(.85,1.1);
       for(let i=0;i<40;i++){ x*=1+gauss()*vol*.8; x=Math.max(.5,x); hist.push(+x.toFixed(2)); }
@@ -653,6 +656,10 @@ function makeNews(){
 }
 const hits = (n,s) => (n.sym===s.sym) || (n.kind==='sector'&&n.sector===s.sector) || n.kind==='mkt';
 const weight = (n,s) => n.kind==='mkt'? s.beta : 1;
+function storyBadge(n){
+  if(S.badges===false || n.sure===undefined) return '';
+  return n.sure ? '<span class="sb ok">✅ Solid story</span>' : '<span class="sb sh">⚠️ Shaky story</span>';
+}
 function newsTag(n){
   if(n.kind==='co') return `<span class="tag">${n.sym}</span>`;
   if(n.kind==='rumor') return `<span class="tag rumor">RUMOR · ${n.sym}</span>`;
@@ -705,7 +712,8 @@ function fireBreak(item){
     s.price=s.path[t]; moves[s.sym]=e;
   });
   const mv=b.sym?moves[b.sym]:Object.values(moves).reduce((a,c)=>a+c,0)/Object.keys(moves).length;
-  S.breaking.unshift({time:clockStr(t),text:b.text,sym:b.sym,move:mv,blurb:b.blurb});
+  S.breaking.unshift({time:clockStr(t),text:b.text,sym:b.sym,move:mv,blurb:b.blurb,sure:b.sure});
+  if(!ffing) tipOnce('break');
   addLog(`BREAKING ${clockStr(t)}: ${b.text}`,'break',`${b.sym||'Market'} ${pct(mv)}`,mv>=0);
   if(b.sym && S.holdings[b.sym]) S.ffHeldBreak=b.sym;
   if(!ffing && !quietMorning){ toast(`🚨 ${b.text}`); sfx('news'); buzz([60,40,60]); }
@@ -732,6 +740,7 @@ function goMidday(){
   if(isOpen()||S.over) return;
   if(S.queue.length){ showQueue(); return; }
   quietMorning=true; openMarket(); while(S.t<MID) stepTick(); paused=true; quietMorning=false;
+  tipOnce('midday');
   const nb=S.breaking.length, held=S.breaking.filter(b=>b.sym&&S.holdings[b.sym]).map(b=>b.sym);
   if(nb) setTimeout(()=>{ if(!isOpen()) return; sfx('news'); buzz([60,40,60]);
     toast(nb===1 ? `🚨 Breaking this morning: ${S.breaking[0].text}` : `🚨 ${nb} breaking stories this morning${held.length?` (incl. ${[...new Set(held)].join(', ')}, which you own)`:''}`); }, S.sound?2100:300);
@@ -742,7 +751,7 @@ function fastForward(){
   if(isOpen()||S.over) return;
   if(S.queue.length){ showQueue(); return; }
   closeSheet();
-  const start={day:S.day, nw:netWorth(), px:{}, qty:{}, rival:S.rival.nw};
+  const start={day:S.day, nw:netWorth(), px:{}, qty:{}};
   S.stocks.forEach(s=>start.px[s.sym]=s.price); Object.entries(S.holdings).forEach(([k,v])=>start.qty[k]=v.qty);
   let reason=''; ffing=true; skipReport=true; S.ffHeldBreak=null;
   const fills0=S.log.length;
@@ -758,7 +767,7 @@ function fastForward(){
   const rows=syms.map(sym=>{ const s=stock(sym), h=S.holdings[sym]; return {sym, qty:h?h.qty:0, chg:s.price/start.px[sym]-1, value:h?h.qty*s.price:0, total:h?(s.price-h.cost)*h.qty:0}; }).sort((a,b)=>b.value-a.value);
   const market=S.stocks.reduce((t,s)=>t+s.price/start.px[s.sym]-1,0)/S.stocks.length;
   const events=S.log.slice(0,Math.max(0,S.log.length-fills0)).filter(l=>['order','break','goal','strike','event','bill'].includes(l.kind)).slice(0,8);
-  S.lastWeek={from:start.day,to:S.day-1,startNW:start.nw,endNW:netWorth(),rows,reason,market,events,rivalChg:S.rival.nw-start.rival};
+  S.lastWeek={from:start.day,to:S.day-1,startNW:start.nw,endNW:netWorth(),rows,reason,market,events};
   if(S.over){ save(); render(); showEnd(); return; }
   S.queue.unshift({type:'week'}); save(); render(); window.scrollTo(0,0); showQueue();
 }
@@ -771,7 +780,7 @@ function showWeek(w, fromQueue){
     <div class="meta">
       <div><div class="k">Change</div><div class="v ${cls(d)}">${d>=0?'+':''}${money(d,true)}</div></div>
       <div><div class="k">Net worth</div><div class="v">${money(w.endNW,true)}</div></div>
-      <div><div class="k">Victor</div><div class="v ${w.rivalChg>=0?'down':'up'}">${w.rivalChg>=0?'+':''}${money(w.rivalChg,true)}</div></div>
+      <div><div class="k">Cash</div><div class="v">${money(S.cash,true)}</div></div>
     </div>
     ${(()=>{ const g=openGoals().sort((a,b)=>a.due-b.due)[0]; return g?`<div class="small" style="margin:2px 0 4px">${g.em} Next deadline: <b>${g.name}</b>, ${fmtDate(g.due)} (${tdays(g.due-S.day)}) · ${goalLine(g)}</div>`:''; })()}
     ${w.rows.length?`<h2>Your stocks this week</h2><div class="card" style="padding:0 12px">${w.rows.map(r=>`<div class="rep-row"><div class="rr1"><span class="sym">${r.sym}</span><span class="small">${r.qty?`${r.qty.toLocaleString()} sh`:'sold'}</span><span class="${cls(r.chg)}" style="font-family:var(--mono)">${pct(r.chg)}</span></div>${r.qty?`<div class="rr2"><span>Value <b>${money(r.value,true)}</b></span><span>Total <b class="${cls(r.total)}">${r.total>=0?'+':''}${money(r.total,true)}</b></span></div>`:''}</div>`).join('')}</div>`:'<p class="small">You didn’t own any stocks this week.</p>'}
@@ -802,17 +811,16 @@ function closeMarket(quiet){
     }
   });
   if(newMonth(S.day)) payBills();
-  if(newWeek(S.day)) S.hearts=Math.max(0,S.hearts-2);
   S.closedNote=S.day>0?closedBetween(S.day-1,S.day):[];
   S.news=S.next; S.next=makeNews();
   morningRead();
-  updateRival(avgRet);
   resolvePending();
   checkGoals();
   maybeEvent();
   coverCash(newMonth(S.day)?'this month’s bills':'today’s costs');
+  { const g=openGoals().sort((a,b)=>a.due-b.due)[0]; if(g && g.due-S.day<=14) tipOnce('deadline'); }
+  if(S.day>=3 && !ffing) tipOnce('ff');
   if(!S.over && netWorth()<-25000) S.over='bankrupt';
-  if(!S.over && S.rival.nw>=ISLAND && !S.items.includes('island')) S.over='rival';
   if(report){ S.lastReport=report; if(S.showReport!==false && !skipReport) S.queue.unshift({type:'report'}); }
   save();
   if(quiet) return;
@@ -871,6 +879,7 @@ function payBills(){
     p.value=Math.round(p.value*(1+.004+gauss()*.025));
   });
   addLog(`Paid monthly bills`,'bill',money(bill),false);
+  if(S.day>0) tipOnce('bills');
 }
 function checkGoals(){
   const nw=netWorth();
@@ -885,7 +894,6 @@ function checkGoals(){
     if(S.day>g.due){
       S.goals[g.id]='failed';
       if(g.final){ S.over='deadline'; return; }
-      if(g.by==='jordan') S.hearts=Math.max(0,S.hearts-25);
       if(S.goodwill>0){ S.goodwill--; addLog(`Missed: ${g.name} — forgiven thanks to your goodwill`,'strike','No strike',true,'whitlock'); notice('whitlock','A deadline forgiven',`You missed <b>${g.name}</b>. Normally that’s a strike — but your generosity at Edna’s gala bought you some goodwill. Just this once.`); return; }
       S.strikes++;
       addLog(`Missed deadline: ${g.name} — strike ${S.strikes} of ${MAX_STRIKES}`,'strike','Strike!',false,'whitlock');
@@ -896,36 +904,8 @@ function checkGoals(){
   });
 }
 
-// ================= RIVAL =================
-function updateRival(avgRet){
-  const R=S.rival, me=netWorth();
-  const aggressive = me > R.nw*1.3 ? 1.2 : 1;           // he takes bigger risks when he's losing
-  R.nw = Math.max(20000, R.nw*(1 + avgRet*.6 + .0031 + gauss()*.015*aggressive));
-  const lead = me>=R.nw ? 'me' : 'him';
-  if(R.lead && lead!==R.lead){
-    if(lead==='me') toast('😼 You just passed Victor!'); else toast('🦹 Victor has pulled ahead of you');
-    S.unread.victor=true;
-  }
-  R.lead=lead;
-  // sabotage: badmouth your biggest position in tomorrow's paper
-  const hs=Object.entries(S.holdings);
-  if(hs.length && S.day>5 && Math.random()<.05){
-    const [sym]=hs.sort((a,b)=>b[1].qty*stock(b[0]).price-a[1].qty*stock(a[0]).price)[0], s=stock(sym);
-    S.next.push(finishNews({kind:'rumor',sym,tpl:'Anonymous tipster claims {n} is hiding big losses',text:`Anonymous tipster claims ${s.name} is hiding big losses`,sign:-1,mag:rnd(.12,.25),rel:.4}));
-    addLog(`Victor is spreading rumors about ${sym}`,'rival','',false,'victor');
-    notice('victor','Watch your back',`Word is I’ve been chatting with some reporters about <b>${s.name}</b>. Shame if your favorite stock tanked tomorrow, cousin. 😈`);
-    S.unread.victor=true;
-  }
-}
-
 // ================= LIFE EVENTS =================
 const EVENTS = {
-  mom:{once:true, w:1, cond:()=>S.day>20,
-    data:()=>({amt:roundK(Math.max(15000,netWorth()*.03))}),
-    view:d=>({who:'jordan',title:'A family emergency',text:`Jordan’s mom needs surgery, and insurance won’t cover <b>${money(d.amt)}</b>. Jordan hasn’t asked — but you can tell they’re scared.`,
-      choices:[{k:'pay',label:`Pay the ${money(d.amt,true)}`,sub:'Family comes first.'},{k:'no',label:'Stay out of it',sub:'It’s their family’s business… right?'}]}),
-    pick:(k,d)=>{ if(k==='pay'){ spend(d.amt); S.hearts=100; return 'Jordan hugs you for a long time. “I don’t know how to thank you.” ❤️ maxed out.'; }
-      S.hearts=Math.max(0,S.hearts-35); return 'Jordan goes quiet for a few days. Something has changed between you.'; }},
   startup:{w:1.2, cond:()=>S.day>10 && !S.pending.some(p=>p.type==='startup'),
     data:()=>({amt:roundK(Math.max(20000,netWorth()*.06)), roll:Math.random(), wait:Math.floor(rnd(40,110))}),
     view:d=>({who:'dev',title:'A once-in-a-lifetime opportunity?',text:`Your old roommate Dev is building an app that “changes everything.” He needs <b>${money(d.amt)}</b> to keep the lights on. It could be huge… or worth nothing.`,
@@ -934,7 +914,7 @@ const EVENTS = {
       if(d.roll<.2) S.pending.push({day:S.day+d.wait,type:'startup_missed',d}); return 'Dev shrugs. “Your loss, buddy.”'; }},
   car:{w:1, cond:()=>S.items.includes('car') && !S.pending.some(p=>p.type==='carbreak'),
     data:()=>({amt:4000}),
-    view:d=>({who:'jordan',title:'That noise…',text:`The new car is making a horrible grinding noise. The mechanic wants <b>${money(d.amt)}</b> to fix it now.`,
+    view:d=>({who:'gus',title:'That noise…',text:`The new car is making a horrible grinding noise. The mechanic wants <b>${money(d.amt)}</b> to fix it now.`,
       choices:[{k:'fix',label:`Fix it — ${money(d.amt)}`,sub:'Better safe than sorry.'},{k:'skip',label:'Ignore it',sub:'It’ll probably stop on its own.'}]}),
     pick:(k,d)=>{ if(k==='fix'){ spend(d.amt); return 'Good as new.'; } if(Math.random()<.5){ S.pending.push({day:S.day+7,type:'carbreak',d:{amt:15000}}); return 'You turn up the radio. Problem solved… for now.'; } return 'The noise stopped on its own. Lucky!'; }},
   audit:{once:true, w:3, cond:()=>false,   // paid tips were removed, so the insider-trading probe no longer happens
@@ -950,38 +930,23 @@ const EVENTS = {
     data:()=>({amt:roundK(Math.max(10000,netWorth()*.02))}),
     view:d=>({who:'whitlock',title:'Edna’s charity gala',text:`The annual gala for Aunt Edna’s children’s hospital is tonight. A donation of <b>${money(d.amt)}</b> would be… noticed.`,
       choices:[{k:'give',label:`Donate ${money(d.amt,true)}`,sub:S.strikes?'Mr. Whitlock may remove a strike.':'Earn goodwill: your next missed deadline is forgiven.'},{k:'no',label:'Skip it',sub:'Keep the cash in the market.'}]}),
-    pick:(k,d)=>{ S.seen.galaDay=S.day; if(k==='no') return 'Victor shows up instead and makes a big show of his check.';
+    pick:(k,d)=>{ S.seen.galaDay=S.day; if(k==='no') return 'Mr. Whitlock notices your empty seat, but says nothing.';
       spend(d.amt); if(S.strikes>0){ S.strikes--; return '“Edna would be proud.” Mr. Whitlock quietly removes a strike.'; } S.goodwill++; return 'Mr. Whitlock makes a note. Your next missed deadline will be forgiven.'; }},
   windfall:{w:.9, cond:()=>true,
-    // Edna's estate: 45% goes to you, 45% to Victor, 10% is a bill both heirs must pay
-    data:()=>{ const r=Math.random(); return {amt:roundK(rnd(5000,30000)), to:r<.45?'me':r<.9?'victor':'debt'}; },
+    // Edna's estate: usually a surprise payout, sometimes a surprise bill
+    data:()=>({amt:roundK(rnd(5000,30000)), to:Math.random()<.8?'me':'debt'}),
     view:d=>{
-      if(d.to==='me') return {who:'whitlock',title:'Edna’s savings bond',text:`A forgotten savings bond of Edna’s turned up worth <b>${money(d.amt)}</b>. The will says it goes to one heir, chosen by drawing a name from her old hat. Mr. Whitlock draws… <b>you!</b>`,
+      if(d.to!=='debt') return {who:'whitlock',title:'Edna’s savings bond',text:`A forgotten savings bond of Edna’s turned up worth <b>${money(d.amt)}</b>. As her heir, it’s yours!`,
         choices:[{k:'keep',label:`Deposit ${money(d.amt,true)}`,sub:'Straight into the trading account.'}]};
-      if(d.to==='victor') return {who:'victor',title:'Edna’s savings bond',text:`A forgotten savings bond of Edna’s turned up worth <b>${money(d.amt)}</b>. Mr. Whitlock draws a name from her old hat… <b>Victor.</b> He pockets the check and winks at you.`,
-        choices:[{k:'ok',label:'Grit your teeth',sub:`Victor’s fortune grows by ${money(d.amt,true)}.`}]};
-      return {who:'whitlock',title:'Edna’s unpaid taxes',text:`The tax office says Edna never paid <b>${money(d.amt)}</b> in back taxes. As heirs, you and Victor <b>each</b> owe that amount.`,
+      return {who:'whitlock',title:'Edna’s unpaid taxes',text:`The tax office says Edna never paid <b>${money(d.amt)}</b> in back taxes. As her heir, you owe it.`,
         choices:[{k:'pay',label:`Pay ${money(d.amt,true)}`,sub:'Get it over with.'},{k:'fight',label:'Fight it in court',sub:'50/50: owe nothing, or owe 1.5× after legal fees.'}]};
     },
     pick:(k,d)=>{
-      S.rival.nw += d.to==='victor' ? d.amt : d.to==='debt' ? -d.amt : 0;
-      if(k==='keep'){ S.cash+=d.amt; return `+${money(d.amt)} cash. Victor sulks.`; }
-      if(k==='share'){ S.cash+=d.amt/2; S.hearts=Math.min(100,S.hearts+20); return `+${money(d.amt/2)} cash, and Jordan is thrilled.`; }
-      if(k==='ok') return '“Edna always liked me best,” says Victor.';
-      if(k==='pay'){ spend(d.amt); return `You paid ${money(d.amt)}. Victor paid his share too, grumbling the whole time.`; }
+      if(k==='keep'||k==='ok'||k==='share'){ S.cash+=d.amt; return `+${money(d.amt)} cash. Edna is still looking out for you.`; }
+      if(k==='pay'){ spend(d.amt); return `You paid ${money(d.amt)}. Mr. Whitlock files the receipt.`; }
       if(Math.random()<.5) return 'The judge throws the case out. You owe nothing!';
       const c=roundK(d.amt*1.5); spend(c); return `You lost in court. With legal fees, it cost you ${money(c)}.`;
     }},
-  bet:{w:1.2, cond:()=>S.day>15 && !S.pending.some(p=>p.type==='bet'),
-    data:()=>({amt:roundK(Math.max(10000,netWorth()*.05))}),
-    view:d=>({who:'victor',title:'Victor wants a wager',text:`“Let’s make this interesting, cousin. <b>${money(d.amt)}</b> says my fortune grows faster than yours over the next month.”`,
-      choices:[{k:'yes',label:`Take the bet — ${money(d.amt,true)}`,sub:'Whoever grows more (in %) wins.'},{k:'no',label:'Walk away',sub:'He’ll call you a chicken.'}]}),
-    pick:(k,d)=>{ if(k==='no'){ return '“Bawk bawk,” says Victor.'; } S.pending.push({day:S.day+21,type:'bet',d:{amt:d.amt,me:netWorth(),him:S.rival.nw}}); return 'You shake on it. The clock starts now — one month.'; }},
-  wedding:{once:true, w:3, cond:()=>S.items.includes('ring'),
-    data:()=>({small:25000, big:roundK(Math.max(150000,netWorth()*.05))}),
-    view:d=>({who:'jordan',title:'Jordan said yes!',text:`Now for the wedding. Jordan says they’re happy with something small… but their eyes light up at the fancy venues.`,
-      choices:[{k:'small',label:`Small wedding — ${money(d.small,true)}`,sub:'Friends, family, a backyard.'},{k:'big',label:`Lavish wedding — ${money(d.big,true)}`,sub:'Half the city is invited. Whitlock will approve.'}]}),
-    pick:(k,d)=>{ if(k==='small'){ spend(d.small); S.hearts=Math.min(100,S.hearts+15); return 'A perfect day. 💍'; } spend(d.big); S.hearts=100; S.goodwill++; return 'The wedding of the year. Even Mr. Whitlock dances. (+1 goodwill)'; }},
 };
 function maybeEvent(){
   if(S.over || S.day-S.lastEvent<5 || Math.random()>.2) return;
@@ -1003,12 +968,7 @@ function resolvePending(){
       else notice('dev','Dev’s app shut down',`“We were ahead of our time,” says Dev. Your ${money(p.d.amt)} is gone.`);
     }
     if(p.type==='startup_missed') notice('dev','Ouch',`Remember Dev’s app? A tech giant just bought it. Your investment would be worth <b>${money(p.d.amt*10)}</b> today.`);
-    if(p.type==='carbreak'){ spend(p.d.amt); notice('jordan','The car died',`Should have fixed that noise. The engine is toast — <b>${money(p.d.amt)}</b> to replace it.`); }
-    if(p.type==='bet'){
-      const mine=netWorth()/p.d.me-1, his=S.rival.nw/p.d.him-1;
-      if(mine>=his){ S.cash+=p.d.amt; notice('victor','You won the bet',`You grew ${pct(mine)} to Victor’s ${pct(his)}. He grumbles and hands over <b>${money(p.d.amt)}</b>.`); sfx('cash'); }
-      else { spend(p.d.amt); notice('victor','You lost the bet',`Victor grew ${pct(his)} to your ${pct(mine)}. He takes your <b>${money(p.d.amt)}</b> with a grin.`); sfx('bad'); }
-    }
+    if(p.type==='carbreak'){ spend(p.d.amt); notice('gus','The car died',`Should have fixed that noise. The engine is toast — <b>${money(p.d.amt)}</b> to replace it.`); }
   });
 }
 function showQueue(){
@@ -1263,7 +1223,6 @@ function buyItem(id){
   const g=GOALS.find(x=>x.id===id); if(goalState(g)||S.cash<g.cost) return;
   if(g.final && S.loan>0){ toast('⚖️ Edna’s will: the island must be bought debt-free. Repay Delia first.'); return; }
   S.cash-=g.cost; S.items.push(id);
-  if(g.by==='jordan') S.hearts=Math.min(100,S.hearts+25);
   addLog(`You bought: ${g.name} ${g.em}`,'goal',money(g.cost),true);
   checkGoals(); if(g.final && S.goals[g.id]==='done') S.over='win';
   save(); render(); if(S.over){ stopTimer(); showEnd(); }
@@ -1312,7 +1271,6 @@ function freeRead(stay){
   if(stay==='silent') return;
   save(); if(stay) render(); else openNpc('marty');
 }
-function dinner(){ const c=800; if(S.cash<c||S.dinnerDay===S.day) return; S.cash-=c; S.dinnerDay=S.day; S.hearts=Math.min(100,S.hearts+12); addLog('Dinner date with Jordan','date',money(c),true,'jordan'); toast('💞 Lovely evening with Jordan'); save(); render(); openNpc('jordan'); }
 
 // ================= RENDER =================
 function spark(h,w=70,ht=26){
@@ -1349,10 +1307,6 @@ function rowHTML(s){
   return `<div class="row" data-sym="${s.sym}"><div><div class="sym">${s.sym}${h?`<span class="own">${h.qty.toLocaleString()}</span>`:''}${ordersFor(s.sym).length?'<span class="own" style="color:var(--blue);border-color:#24506a">📋</span>':''}</div><div class="nm">${esc(s.name)} · ${s.sector}</div></div>
     <div>${spark(histNow(s))}</div><div class="px"><div class="p">${s.price.toFixed(2)}</div><div class="c ${cls(c)}">${pct(c)}</div></div></div>`;
 }
-function raceHTML(){
-  const me=netWorth(), him=S.rival.nw, lead=me>=him;
-  return `<div class="race" data-npc="victor"><div class="me ${lead?'up':''}"><div class="lbl">You</div>${money(me,true)}</div><div class="vs">VS</div><div class="vic ${lead?'':'down'}"><div class="lbl">Victor 🦹</div>${money(him,true)}</div></div>`;
-}
 function dueBanner(){
   const g=openGoals().sort((a,b)=>a.due-b.due)[0]; if(!g) return '';
   const left=g.due-S.day;
@@ -1383,20 +1337,41 @@ function martyCard(){
   } else read=`<div class="small">Marty’s read will be ready tomorrow morning.</div>`;
   return `<div class="mcard">${face}<div class="mbody"><div class="mt">Marty Kessler <span class="small">· your broker</span></div>${read}</div></div>`;
 }
+const TIPS={
+  marty:'<b>Marty’s card</b> lists stocks he thinks are cheap today. Tap one to trade it. Cheap stocks usually recover over a few weeks, not overnight.',
+  midday:'<b>It’s midday.</b> Prices have moved since the 9:30 open. Trade again if you like, or tap <b>Ring the closing bell</b> to finish the day.',
+  brk:'<b>Breaking news</b> hit this morning. It can move a stock a lot. Tap the red box to read it.',
+  bills:'<b>Bill day.</b> Rent and living costs come out on the first trading day of each month. Keep some cash handy so Marty doesn’t have to sell your stocks.',
+  deadline:'<b>A deadline is close.</b> When the goal box turns red you have under two weeks. Buy goals on the <b>Goals</b> tab once you have the cash.',
+  ff:'<b>Tip:</b> the blue <b>⏩ WEEK</b> button plays out the rest of the week without stopping. Handy when you’re holding and waiting.',
+};
+TIPS.break=TIPS.brk;
+function tipOnce(k){
+  if(!S||tutOn||!S.storySeen||!TIPS[k]) return;
+  S.tipsSeen=S.tipsSeen||{}; if(S.tipsSeen[k]) return; S.tipsSeen[k]=true;
+  (S.hintQ=S.hintQ||[]).push(k);
+}
+function hintCard(){ const k=(S.hintQ||[])[0]; if(!k||!TIPS[k]) return ''; return `<div class="hint"><div class="hx">💡</div><div class="ht">${TIPS[k]}</div><button class="btn ghost" data-act="hintok">Got it</button></div>`; }
+function todayCard(){
+  if(S.day>=5 || S.chkOff || S.over) return '';
+  const traded=(S.orders||[]).length>0 || S.log.some(l=>l.day===S.day&&(l.kind==='trade'||l.kind==='order'));
+  const items=[[S.chkRead===S.day||!S.news.length, S.news.length?'📰 Read a headline (tap one in the paper)':'📰 No headlines today: a quiet morning'],[traded,'🛒 Buy a stock (tap any company below)'],[isOpen(),'🔔 Open the market'],[false,'🔔 Ring the closing bell']];
+  return `<div class="today"><div class="tt"><span>Today’s to-do · first week</span><button data-act="chkoff" aria-label="Hide">✕</button></div>${items.map(([d,t])=>`<div class="ck ${d?'done':''}">${d?'☑':'☐'} ${t}</div>`).join('')}</div>`;
+}
 function viewMarket(){
   const open=isOpen();
   const no=(S.orders||[]).length;
-  return `${raceHTML()}${dueBanner()}
+  return `${hintCard()}${dueBanner()}${todayCard()}
   ${no?`<div class="due" style="background:#10222e;border-color:#24506a" data-tab="portfolio"><div class="em">📋</div><div class="t"><b>${no} order${no>1?'s':''} waiting</b>${open?'Watching prices…':'Ready for the opening bell'}</div><div class="dl" style="color:var(--blue)">Manage ›</div></div>`:''}
   ${open?middayCard():''}
-  ${S.breaking.map((b,i)=>`<div class="brk" data-art="b${i}"><div class="h">🚨 BREAKING · ${b.time}</div><div class="tx">${esc(b.text)}</div><div class="mv ${cls(b.move)}">${b.sym||'Market'} ${pct(b.move)}${paused&&S.breakPaused&&b===S.breaking[0]?' · market paused — tap to read & trade, ▶ to resume':''}</div></div>`).join('')}
+  ${S.breaking.map((b,i)=>`<div class="brk" data-art="b${i}"><div class="h">🚨 BREAKING · ${b.time}</div><div class="tx">${esc(b.text)}</div>${storyBadge(b)}<div class="mv ${cls(b.move)}">${b.sym||'Market'} ${pct(b.move)}${paused&&S.breakPaused&&b===S.breaking[0]?' · market paused — tap to read & trade, ▶ to resume':''}</div></div>`).join('')}
   ${martyCard()}
   <h2>Morning Edition</h2>
   <div class="paper"><div class="mast">THE EXCHANGE DAILY</div><div class="sub">${fmtDateY(S.day)} · ${tdays(DEADLINE-S.day)} left in Aunt Edna’s challenge</div>${(S.closedNote||[]).length?`<div class="closed-note" style="text-align:center;margin:-2px 0 6px">🏛️ Market was closed ${S.closedNote.join(" and ")}.</div>`:""}
     ${S.news.map(n=>{
       let mv='';
       if(open && n.moves){ const m=n.sym?n.moves[n.sym]:Object.values(n.moves).reduce((a,b)=>a+b,0)/Math.max(1,Object.keys(n.moves).length); mv=`<div class="mv ${cls(m)}">${n.sym||'Avg'} ${pct(m)} at the open</div>`; }
-      return `<div class="headline" data-art="n${S.news.indexOf(n)}">${newsTag(n)}<div><div class="txt">${esc(n.text)}</div>${mv}</div></div>`}).join('')}
+      return `<div class="headline" data-art="n${S.news.indexOf(n)}">${newsTag(n)}<div><div class="txt">${esc(n.text)}</div>${storyBadge(n)}${mv}</div></div>`}).join('')}
     ${S.news.length?'':'<div class="headline" style="cursor:default"><div class="txt" style="font-weight:400;font-style:italic">A quiet morning. No major stories today.</div></div>'}
     ${open?'':'<div class="closed-note">🌅 Pre-market: trades you make now fill at the 9:30 opening price.</div>'}
   </div>
@@ -1427,6 +1402,7 @@ function viewPortfolio(){
   <div style="margin-top:18px" class="acts"><button class="btn ghost" data-act="story">Replay story</button><button class="btn ghost" data-act="tutorial">Replay tutorial</button></div>
   <div style="margin-top:10px" class="acts"><button class="btn ghost" data-act="howto">Quick rules</button><button class="btn ghost" data-act="sound">Sound: ${S.sound?'On 🔊':'Off 🔇'}</button></div>
   <div style="margin-top:10px" class="acts"><button class="btn ghost" data-act="lastrep">Last closing report</button><button class="btn ghost" data-act="lastweek">Last week</button><button class="btn ghost" data-act="togrep">Daily report: ${S.showReport!==false?"On":"Off"}</button></div>
+  <div style="margin-top:10px"><button class="btn ghost" style="width:100%" data-act="badges">Story badges (✅ Solid / ⚠️ Shaky): ${S.badges!==false?'On':'Off'}</button></div>
   <div style="margin-top:10px;display:none"><button class="btn ghost" style="width:100%" data-act="autopause">Pause on breaking news: ${S.autoPause!==false?'On ⏸':'Off'}</button></div>
   <div style="margin-top:10px"><button class="btn ghost" style="width:100%;color:var(--red)" data-act="reset">Start a new game</button></div>`;
 }
@@ -1435,23 +1411,20 @@ function npcLine(id){
   if(id==='delia') return S.loan?`“Your balance is ${money(S.loan,true)}. Interest is due monthly.”`:`“You qualify for up to ${money(creditAvail(),true)}.”`;
   if(id==='ray') return ownsHome()?'“How’s the new place treating you?”':'“Still renting? Let’s fix that.”';
   if(id==='whitlock'){ const g=openGoals().sort((a,b)=>a.due-b.due)[0]; return g?`“${g.name}: due ${fmtDate(g.due)}.”`:'“Your affairs appear to be in order.”'; }
-  if(id==='jordan') return S.hearts>70?'“I’m so proud of you.”':S.hearts>40?'“We should spend more time together.”':'“Do you even notice I’m here?”';
-  if(id==='victor') return netWorth()>=S.rival.nw?'“Enjoy the lead. It won’t last.”':`“I’m ${money(S.rival.nw-netWorth(),true)} ahead, cousin.”`;
   return '';
 }
 function viewPeople(){
-  return `<h2>People you know</h2><div class="card">${['marty','delia','ray','whitlock','jordan','victor'].map(id=>{const n=NPCS[id]; return `
+  return `<h2>People you know</h2><div class="card">${['marty','delia','ray','whitlock'].map(id=>{const n=NPCS[id]; return `
     <div class="npc" data-npc="${id}"><div class="av" style="background:${n.bg}">${n.em}</div>
-    <div class="who"><div class="n">${n.name}${S.unread[id]?' <span style="color:var(--red)">●</span>':''}</div><div class="r">${n.role}</div><div class="q">${esc(npcLine(id))}</div></div><div style="color:var(--dim)">›</div></div>`}).join('')}</div>`;
+    <div class="who"><div class="n">${n.name}${S.unread[id]?' <span style="color:var(--red)">●</span>':''}${!(S.met||{})[id]?' <span class="newb">NEW</span>':''}</div><div class="r">${n.role}</div><div class="q">${esc(npcLine(id))}</div></div><div style="color:var(--dim)">›</div></div>`}).join('')}</div>`;
 }
 function viewGoals(){
   const done=GOALS.filter(g=>goalState(g)==='done').length;
   return `<h2>Aunt Edna’s Challenge</h2>
-  <div class="card" style="padding:12px 14px"><div class="story">Hit each goal before its deadline. Miss <b>${MAX_STRIKES}</b> and Mr. Whitlock voids the will. Buy the <b>Private Island</b> by ${fmtDateY(DEADLINE)}, debt-free, before Cousin Victor can afford it.</div>
+  <div class="card" style="padding:12px 14px"><div class="story">Hit each goal before its deadline. Miss <b>${MAX_STRIKES}</b> and Mr. Whitlock voids the will. Buy the <b>Private Island</b> by ${fmtDateY(DEADLINE)}, debt-free, and Edna’s whole estate is yours.</div>
   <div class="bar" style="margin-top:10px"><i style="width:${done/GOALS.length*100}%"></i></div>
   <div class="small" style="margin-top:6px">${done} of ${GOALS.length} done · strikes ${S.strikes}/${MAX_STRIKES}${S.goodwill?` · goodwill ${S.goodwill}`:''} · ${tdays(DEADLINE-S.day)} left</div></div>
-  ${raceHTML()}
-  <h2>Goals</h2><div class="card">${GOALS.map(g=>{
+  <h2>${goalsAll?'All goals':'Coming up next'}</h2><div class="card">${(goalsAll?GOALS:(()=>{ const o=openGoals().sort((a,b)=>a.due-b.due), L=o.slice(0,3), isl=GOALS.find(g=>g.final); if(o.includes(isl)&&!L.includes(isl)) L.push(isl); return L; })()).map(g=>{
     const st=goalState(g), left=g.due-S.day;
     let prog=0; if(g.type==='nw') prog=netWorth()/g.target; else if(g.type==='buy') prog=S.cash/g.cost; else if(g.type==='prop') prog=S.cash/(propS(g.prop).value*(DOWN+CLOSING));
     prog=clamp(prog,0,1);
@@ -1461,7 +1434,8 @@ function viewGoals(){
     return `<div class="goal ${st||''}"><div class="em">${st==='done'?'✅':st==='failed'?'❌':g.em}</div>
       <div class="gt"><div class="gn">${g.name}</div><div class="gd">${esc(g.desc)}${g.upkeep?` Upkeep ${money(g.upkeep)}/mo.`:''}</div>
       <div class="gc">${goalLine(g)} · <span style="color:${st?'var(--dim)':left<=14?'var(--red)':'var(--gold)'}">${st==='done'?'done':st==='failed'?'missed':`due ${fmtDateY(g.due,false)} (${tdays(left)})`}</span></div>
-      ${!st&&g.type!=='home'?`<div class="bar"><i style="width:${prog*100}%"></i></div>`:''}</div>${action}</div>`}).join('')}</div>`;
+      ${!st&&g.type!=='home'?`<div class="bar"><i style="width:${prog*100}%"></i></div>`:''}</div>${action}</div>`}).join('')}</div>
+  <button class="btn ghost seeall" data-act="goalsall">${goalsAll?'Show just what’s next':`See all ${GOALS.length} goals ›`}</button>`;
 }
 let logFilter='all';
 const LOG_GROUPS={trades:['trade','order'], news:['co','rumor','sector','mkt','break'], life:['event','goal','strike','bill','loan','prop','date','rival','tip']};
@@ -1494,8 +1468,14 @@ function liveRender(){
 function openSheet(html, modal){ $('#sheet').innerHTML=(modal?'':'<div class="grab"></div>')+html; $('#scrim').className='scrim show'+(modal?' modal':''); }
 function closeSheet(){ $('#scrim').className='scrim'; sheetSym=null; sheetNpc=null; }
 
+const NPC_INTRO={
+  marty:'Marty Kessler, stockbroker. Every morning I post my read on the Market screen: which stocks look cheap and which look overheated. Free of charge, kid.',
+  delia:'Delia Park, Bankrest. When you want more money to invest, I can lend you up to <b>half your net worth</b>. Interest is due every month, so don’t borrow what you can’t pay back.',
+  ray:'Ray Alvarez, real estate! You’re paying <b>$1,800 a month</b> in rent. Buy a place with 20% down and the rent goes away. Edna’s old <b>lake house</b> is on my list too.',
+  whitlock:'As Edna’s lawyer, I keep score: her goals, your deadlines and your strikes. Miss three deadlines and the will is void.',
+};
 function openNpc(id){
-  sheetNpc=id; sheetSym=null; S.unread[id]=false; save(); render();
+  sheetNpc=id; sheetSym=null; S.unread[id]=false; S.met=S.met||{}; const first=!S.met[id]&&NPC_INTRO[id]; S.met[id]=true; save(); render();
   const n=NPCS[id]; let say='', opts='';
   if(id==='marty'){
     if(S.martyBan>S.day){ say=`<i>A note is taped to Marty’s door: “Gone fishing. Back ${fmtDate(S.martyBan)}. Don’t call.”</i>`; }
@@ -1528,27 +1508,13 @@ function openNpc(id){
     if(S.goodwill) say+=` You do have <b>${S.goodwill}</b> goodwill banked — I’ll forgive a missed deadline.`;
     opts = `<h2 style="margin-top:4px">Coming due</h2><div class="card">${up.map(g=>`<div class="goal"><div class="em">${g.em}</div><div class="gt"><div class="gn">${g.name}</div><div class="gc">${goalLine(g)} · <span style="color:var(--gold)">${g.due-S.day} days</span></div></div></div>`).join('')||'<div class="empty">All done!</div>'}</div>`;
   }
-  if(id==='jordan'){
-    const h=Math.round(S.hearts/20);
-    say = S.hearts>70 ? `I love how driven you are. Just don’t forget the little things — like our anniversary, and maybe… a ring? 😉`
-        : S.hearts>40 ? `You’ve been glued to that ticker all week. How about dinner tonight?`
-        : `I feel like I’m competing with the stock market. And losing.`;
-    opts = `<div class="hearts">${'❤️'.repeat(h)}${'🤍'.repeat(5-h)}</div>
-      <button class="btn gold opt" data-act="dinner" ${S.cash<800||S.dinnerDay===S.day?'disabled':''}>Dinner date — $800<small>Keeps Jordan happy. Missing Jordan’s goals hurts a lot.</small></button>`;
-  }
-  if(id==='victor'){
-    const me=netWorth(), him=S.rival.nw, ahead=him>me;
-    say = pick(ahead?VICTOR_TAUNTS.ahead:VICTOR_TAUNTS.behind) + `<br><br><span class="small">Victor is chasing the same inheritance. If his fortune reaches <b>${money(ISLAND,true)}</b> before you buy the island, he buys it first — and you lose.</span>`;
-    const bet=S.pending.find(p=>p.type==='bet');
-    opts = `<div class="meta" style="grid-template-columns:1fr 1fr"><div><div class="k">You</div><div class="v ${ahead?'':'up'}">${money(me,true)}</div></div><div><div class="k">Victor</div><div class="v ${ahead?'down':''}">${money(him,true)}</div></div></div>
-      ${bet?`<p class="small">Your bet of ${money(bet.d.amt,true)} settles on ${fmtDate(bet.day)}.</p>`:`<button class="btn gold opt" data-act="bet" ${S.day<3?'disabled':''}>Challenge him to a bet<small>Whoever grows faster over the next month wins the pot.</small></button>`}`;
-  }
+  if(first) say=`${NPC_INTRO[id]}<br><br>${say}`;
   openSheet(`<div class="sh-top" style="justify-content:flex-start;align-items:center"><div class="av" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:17px">${n.name}</div><div class="small">${n.role}</div></div></div>
     <div class="bubble">${say}</div>${opts}<button class="btn ghost" style="width:100%;margin-top:12px" data-act="close">Leave</button>`);
 }
 
 function openArticle(ref){
-  sheetSym=null; sheetNpc=null;
+  sheetSym=null; sheetNpc=null; S.chkRead=S.day;
   const brk=ref[0]==='b', n=brk?S.breaking[+ref.slice(1)]:S.news[+ref.slice(1)]; if(!n) return;
   const syms = n.sym?[n.sym] : n.sector? S.stocks.filter(s=>s.sector===n.sector).map(s=>s.sym) : [];
   let tag = brk? `<span class="tag rumor">🚨 BREAKING · ${n.time}</span>` : newsTag(n);
@@ -1556,7 +1522,7 @@ function openArticle(ref){
   openSheet(`<div class="paper" style="margin-top:4px"><div class="mast">THE EXCHANGE DAILY</div>
       <div class="sub">Day ${S.day+1}${brk?' · '+n.time:' · Morning Edition'}</div>
       <div style="margin:8px 0 6px">${tag}</div>
-      <div class="art-h">${esc(n.text)}</div>
+      <div class="art-h">${esc(n.text)}</div>${storyBadge(n)?`<div style="margin:-2px 0 6px">${storyBadge(n)} <span style="font-size:11px;color:#5c5340">${n.sure?'Solid stories usually hold up.':'Shaky stories often fall apart.'}</span></div>`:''}
       <div class="art-b">${esc(n.blurb||'No further details were available at press time.')}</div></div>
     ${syms.length?`<h2>${syms.length>1?'Stocks in this story':'The stock'}</h2>${syms.map(moveLine).join('')}`:'<p class="small" style="margin-top:12px">This story affects the whole market — some stocks more than others.</p>'}
     ${isOpen()?'':'<p class="small">The market is closed. Trading opens at 9:30 AM.</p>'}
@@ -1583,13 +1549,15 @@ function openTrade(sym, slideDir){
   sheetSym=sym; sheetNpc=null;
   const s=stock(sym), h=S.holdings[sym], prevQty=$('#q')?$('#q').value:'';
   const story=S.news.find(n=>n.sym===sym), brk=S.breaking.find(b=>b.sym===sym);
+  if(!advOpen) tradeMode='now';
   const mode=tradeMode==='now'?'now':'plan';
+  const nOrd=ordersFor(sym).length;
   if(OTYPES[orderType].closedOnly&&isOpen()) orderType='limit';
   const L=swipeSyms(), pos=L.indexOf(sym);
   openSheet(`${L.length>1&&pos>=0?`<div class="tnav"><button data-swipe="-1">‹ ${L[(pos-1+L.length)%L.length]}</button><span>${pos+1} of ${L.length} · swipe</span><button data-swipe="1">${L[(pos+1)%L.length]} ›</button></div>`:''}<div class="sh-top"><div><div class="sym" style="font-size:20px">${s.sym}</div><div class="nm" style="font-size:13px">${esc(s.name)} · ${s.sector}</div><button class="about" data-about="${s.sym}">ℹ️ About the company</button></div>
     <div style="text-align:right"><div class="big" id="tPrice"></div><div id="tChg" style="font-family:var(--mono);font-size:13px"></div></div></div>
     ${martyHint(sym)}
-    ${brk?`<div class="bubble" style="margin:10px 0 0;font-size:13px;border-color:#6a2430">🚨 ${esc(brk.text)}</div>`:story?`<div class="bubble" style="margin:10px 0 0;font-size:13px">📰 ${esc(story.text)}</div>`:''}
+    ${brk?`<div class="bubble" style="margin:10px 0 0;font-size:13px;border-color:#6a2430">🚨 ${esc(brk.text)} ${brk.sure!==undefined&&S.badges!==false?(brk.sure?'· ✅ Solid':'· ⚠️ Shaky'):''}</div>`:story?`<div class="bubble" style="margin:10px 0 0;font-size:13px">📰 ${esc(story.text)} ${story.sure!==undefined&&S.badges!==false?(story.sure?'· ✅ Solid':'· ⚠️ Shaky'):''}</div>`:''}
     <canvas id="chart"></canvas>
     <div class="meta">
       <div><div class="k">5-day</div><div class="v" id="t5"></div></div>
@@ -1599,7 +1567,7 @@ function openTrade(sym, slideDir){
       <div><div class="k">Gain</div><div class="v" id="tGain"></div></div>
       <div><div class="k">Volatility</div><div class="v">${s.vol>.06?'Wild':s.vol>.04?'High':'Medium'}</div></div>
     </div>
-    <div class="seg"><button data-tmode="now" class="${mode==='now'?'on':''}">Trade now</button><button data-tmode="plan" class="${mode==='plan'?'on':''}">Plan an order</button></div>
+    ${advOpen?`<div class="advbox">${(S.tipsSeen||{}).adv?'':'<div class="small" style="margin:8px 0 0">💡 <b>Advanced tools.</b> <b>Plan an order</b> sets a trade that fires on its own when a price is hit, like a stop-loss that sells if a stock crashes. <b>Auto-protect</b> adds those orders to every new buy.</div>'}<div class="seg"><button data-tmode="now" class="${mode==='now'?'on':''}">Trade now</button><button data-tmode="plan" class="${mode==='plan'?'on':''}">Plan an order</button></div>`:'<div style="height:12px"></div>'}
     ${mode==='now'&&!isOpen()?'<div class="tclosed">🌅 Pre-market: Buy and Sell are queued and fill at the 9:30 opening price.</div>':''}
     ${mode==='plan'?`<div class="otypes">${Object.entries(OTYPES).filter(([k,t])=>!(t.closedOnly&&isOpen())).map(([k,t])=>`<button data-otype="${k}" class="${k===orderType?'on':''} ${t.side}">${t.label}</button>`).join('')}</div>
       <div class="small" style="margin:2px 0 8px">${OTYPES[orderType].desc}</div>
@@ -1609,10 +1577,13 @@ function openTrade(sym, slideDir){
     <div class="qty"><button data-q="-1">−</button><input id="q" type="number" inputmode="numeric" min="1" placeholder="Shares" value="${prevQty}"><button data-q="1">+</button></div>
     <div class="chips"><button data-qadd="100">+100</button><button data-qadd="1000">+1K</button><button data-qset="maxbuy">Max</button><button data-qset="all">All</button><button data-qset="">Clear</button></div>
     <div class="est" id="est"></div>
-    ${mode==='now'||OTYPES[orderType].side==='buy'?`<button class="prot" data-prot="${sym}">🛡 Auto-protect new shares: <b>${protLabel(protFor(sym))}</b>${protectState().per[sym]?' <span class="small">(this stock)</span>':''} <span class="pchg">Change ›</span></button>`:''}
+    ${advOpen&&(mode==='now'||OTYPES[orderType].side==='buy')?`<button class="prot" data-prot="${sym}">🛡 Auto-protect new shares: <b>${protLabel(protFor(sym))}</b>${protectState().per[sym]?' <span class="small">(this stock)</span>':''} <span class="pchg">Change ›</span></button>`:''}
     ${mode==='now'?`<div class="acts"><button class="btn buy" id="buyB">${isOpen()?'Buy':'Buy at open'}</button><button class="btn sell" id="sellB">${isOpen()?'Sell':'Sell at open'}</button></div>`:`<button class="btn blue" style="width:100%" id="placeB">Place order</button>`}
-    ${ordersFor(sym).length?`<h2>Your orders on ${sym}</h2><div class="card" style="padding:4px 12px">${ordersFor(sym).map(o=>orderRow(o,false)).join('')}</div>`:''}
+    ${advOpen?'</div>':''}
+    ${nOrd?`<h2>Your orders on ${sym}</h2><div class="card" style="padding:4px 12px">${ordersFor(sym).map(o=>orderRow(o,false)).join('')}</div>`:''}
+    <button class="advt" data-act="adv">${advOpen?'Hide advanced ▴':'Advanced ▾ <span style="font-weight:400">· planned orders, stop-loss, auto-protect</span>'}</button>
     <button class="btn ghost" style="width:100%;margin-top:10px" data-act="close">Close</button>`);
+  if(advOpen){ S.tipsSeen=S.tipsSeen||{}; S.tipsSeen.adv=true; }
   updateTradeLive();
   if(slideDir){ const sh=$('#sheet'); sh.classList.remove('sl','sr'); void sh.offsetWidth; sh.classList.add(slideDir>0?'sl':'sr'); sh.scrollTop=0; }
 }
@@ -1671,13 +1642,14 @@ function drawChart(s){
 }
 function showHowTo(){
   openSheet(`<div class="pixel">TICKER TYCOON</div>
-  <div class="story">Great-Aunt Edna left you <b>$100,000</b> and a challenge. Hit her goals on schedule and her whole estate is yours — unless Cousin Victor gets there first.</div>
+  <div class="story">Great-Aunt Edna left you <b>$100,000</b> and a challenge. Hit her goals on schedule and her whole estate is yours.</div>
   <ul class="how">
     <li><b>Three stops a day.</b> Trade before the open (fills at 9:30), check in at midday (12:45), then ring the closing bell. Use ⏩ WEEK to skip ahead.</li>
     <li><b>Breaking news</b> hits in the morning. You’ll see it at midday and can react.</li>
-    <li><b>Plan ahead:</b> set buy-at-open, limit, take-profit and stop-loss orders. They fire on their own during the day.</li>
+    <li><b>Read the paper.</b> ✅ Solid stories usually hold up; ⚠️ Shaky ones often reverse. Marty’s card shows cheap stocks.</li>
+    <li><b>Advanced ▾</b> on the trade screen lets you plan limit, take-profit and stop-loss orders.</li>
     <li><b>Goals have deadlines.</b> Miss ${MAX_STRIKES} and the will is void.</li>
-    <li><b>People:</b> Marty gives a free daily market read, Delia lends money, Ray sells houses, Jordan needs attention, and Victor wants you to fail.</li>
+    <li><b>People:</b> Marty gives a free daily market read, Delia lends money, Ray sells houses, and Mr. Whitlock keeps track of your goals.</li>
     <li><b>Life happens.</b> Expect surprises and tough choices.</li>
   </ul>
   <button class="btn buy" style="width:100%;margin-top:8px" data-act="startplay">Let’s trade</button>`, true);
@@ -1685,12 +1657,12 @@ function showHowTo(){
 function showEnd(){
   stopTimer();
   const nw=netWorth();
-  const title={win:'YOU WIN!',bankrupt:'BANKRUPT',strikes:'WILL VOIDED',deadline:'TIME’S UP',rival:'VICTOR WINS'}[S.over];
-  const msg={win:`You bought the island on day ${S.day+1}. Mr. Whitlock hands over the keys to Edna’s fortune.${S.hearts>50?' Jordan is by your side.':''} Victor is furious.`,
+  const title={win:'YOU WIN!',bankrupt:'BANKRUPT',strikes:'WILL VOIDED',deadline:'TIME’S UP',rival:'GAME OVER'}[S.over];
+  const msg={win:`You bought the island on day ${S.day+1}. Mr. Whitlock hands over the keys to Edna’s fortune. She would be proud.`,
     bankrupt:`Your debts caught up with you. Delia from Bankrest would like a word.`,
-    strikes:`Too many missed deadlines. Mr. Whitlock sadly closes his briefcase. Victor is already celebrating.`,
+    strikes:`Too many missed deadlines. Mr. Whitlock sadly closes his briefcase.`,
     deadline:`Three years are up and the island is still for sale.`,
-    rival:`Victor hit ${money(ISLAND,true)} and bought the island out from under you. He sends a postcard: “Wish you were here.”`}[S.over];
+    rival:`The island was sold to another buyer.`}[S.over];
   if(S.over==='win'){ confetti(); sfx('goal'); }
   let best=0; try{ best=+localStorage.getItem('tickerTycoonBest3')||0; if(nw>best) localStorage.setItem('tickerTycoonBest3',nw); }catch(e){}
   openSheet(`<div class="pixel">${title}</div><div class="story" style="text-align:center">${msg}</div>
@@ -1786,18 +1758,11 @@ function openProfile(sym){
 
 // ================= STORY & TUTORIAL =================
 const STORY=[
-  {who:null, text:'Pinecrest City. A rainy Monday morning. An envelope arrives on heavy cream paper, sealed with wax…'},
-  {who:'whitlock', text:'Good morning. I am Mr. Whitlock, attorney for your great-aunt <b>Edna Ashworth</b>. I’m sorry to tell you she passed away last week, at the age of 97.'},
-  {who:'whitlock', text:'Edna built her fortune trading on the <b>Pinecrest Stock Exchange</b>, and it is considerable. Her will, however, is… unusual.'},
-  {who:'whitlock', text:'She has left you <b>$100,000</b>. Not as a gift but as a test. Grow it, live well, and prove you can handle money, and you inherit her <b>entire estate</b>.'},
-  {who:'whitlock', text:'Edna wrote a list of <b>13 goals</b>: a sharp suit, a home, a car, a ring, all the way up to a <b>private island</b>. Each has a deadline. Miss <b>three</b> deadlines and the will is void. Buy the island within <b>three years</b>, free of debt, and everything is yours.'},
-  {who:'victor', text:'Not so fast, cousin. Aunt Edna gave <b>me</b> the same $100K and the same deal. If my fortune hits <b>$4 million</b> before you buy that island, I buy it first and you get <b>nothing</b>. 😈'},
-  {who:'whitlock', text:'…Yes. Your cousin Victor. Do keep an eye on him. Now, you’ll want some help. Edna kept a few people she trusted.'},
-  {who:'marty', text:'Marty Kessler, stockbroker. I give you a <b>free read</b> on the market once a day: which stocks look cheap, which look overheated.'},
-  {who:'delia', text:'Delia Park, Bankrest. When you want more money to invest, I can lend you up to <b>half your net worth</b>. Interest is due every month, so don’t borrow what you can’t pay back.'},
-  {who:'ray', text:'Ray Alvarez, real estate! You’re paying <b>$1,800 a month</b> in rent. Buy a place from me with 20% down and the rent goes away. Edna’s old <b>lake house</b> is on my list too.'},
-  {who:'jordan', text:'And then there’s me, Jordan. Your partner, remember? 😉 I’m proud of you. Just don’t forget about us while you’re glued to that ticker. A few of Edna’s goals are for me.'},
-  {who:'whitlock', text:'Rent and living costs come due on the first of every month, and life will throw surprises at you. You’ll find everyone in the <b>People</b> tab. The market opens at 9:30 tomorrow. Good luck.', last:true},
+  {who:null, text:'Pinecrest City. A rainy Monday morning. A letter arrives from the lawyer of your great-aunt <b>Edna</b>, who just passed away at 97…'},
+  {who:'whitlock', text:'Edna made her fortune on the <b>Pinecrest Stock Exchange</b>. She left you <b>$100,000</b>, not as a gift but as a test. Grow it, and you inherit her <b>entire estate</b>.'},
+  {who:'whitlock', text:'She wrote a list of <b>goals</b>, each with a deadline: a sharp suit, a home, a car… all the way up to a <b>$4 million private island</b>. Miss <b>three</b> deadlines and the will is void.'},
+  {who:'marty', text:'Marty Kessler, your broker. Every morning I’ll tell you which stocks look cheap. You’ll meet Edna’s other friends in the <b>People</b> tab when you need them.'},
+  {who:'whitlock', text:'The market opens at 9:30 tomorrow. Shall I show you the basics? It takes about thirty seconds.', last:true},
 ];
 function showStory(i){
   const p=STORY[i], n=p.who?NPCS[p.who]:null;
@@ -1806,7 +1771,7 @@ function showStory(i){
     ${n?`<div class="story-who"><div class="av big" style="background:${n.bg}">${n.em}</div><div><div style="font-weight:700;font-size:18px">${n.name}</div><div class="small">${n.role}</div></div></div>`:'<div style="font-size:54px;text-align:center;margin:8px 0">✉️</div>'}
     <div class="bubble story-text">${p.text}</div>
     <div class="dots">${dots}</div>
-    ${p.last?`<button class="btn buy" style="width:100%;margin-top:4px" data-act="tutstart">Show me how to play</button>
+    ${p.last?`<button class="btn buy" style="width:100%;margin-top:4px" data-act="tutstart">Show me (4 quick steps)</button>
       <button class="btn ghost" style="width:100%;margin-top:8px" data-act="tutno">Skip the tutorial</button>`
     :`<div class="acts" style="margin-top:4px">${i?`<button class="btn ghost" data-story="${i-1}">Back</button>`:`<button class="btn ghost" data-act="storyskip">Skip story</button>`}<button class="btn buy" data-story="${i+1}">Next ›</button></div>`}`, true);
 }
@@ -1820,25 +1785,12 @@ function tutTrade(mode, otype){
   openTrade(sym);
 }
 const TUT=[
-  {sel:'.stats', setup:()=>{ closeSheet(); tab='market'; render(); window.scrollTo(0,0); },
-   text:'<b>Cash</b> is money you can spend right now. <b>Net worth</b> is everything you own minus everything you owe. That’s your score. <b>Strikes</b> are missed deadlines. Three and you lose.'},
-  {sel:'.race', text:'Your race against Cousin Victor. If his fortune reaches $4M before you buy the island, he wins. Tap this anytime to visit him.'},
-  {sel:'.due', text:'Your next deadline from Edna’s list. It turns red when it’s due within two weeks. Tap it to see every goal.'},
-  {sel:'.paper', text:'The <b>Morning Edition</b>. These headlines move prices when the market opens. Tap any headline to read the article. <b>Confident</b> articles usually hold up; <b>doubtful</b> ones often fall apart. Rumors are a coin flip.'},
-  {sel:'.card .row', text:'Each row is a company: its ticker symbol, its last 30 trading days, its price and today’s change. Tap a company to trade it. Let’s open one.'},
-  {sel:'.about', setup:()=>tutTrade('now'), text:'Tap <b>ℹ️ About the company</b> to learn what the business does, who runs it and what tends to move its stock.'},
-  {sel:'#chart', text:'The price chart for the last 60 days. During the live day, today’s moves draw on the right. If you own shares, a yellow dashed line marks the average price you paid.'},
-  {sel:'#sheet .meta', text:'Quick stats: the 5-day change, how many shares you own, what you paid, what they’re worth, and how <b>wild</b> the stock is. Wild stocks swing hard in both directions.'},
-  {sel:'#sheet .seg', text:'Two ways to trade. <b>Trade now</b>: before the open your trade is queued and fills at the 9:30 opening price; at midday it fills instantly. <b>Plan an order</b> sets up a trade that fires on its own when a price is hit.'},
-  {sel:'#q', hl:'parent', text:'How many shares to trade. Type a number, or use <b>−</b> and <b>+</b> to adjust by one.'},
-  {sel:'#sheet .chips', text:'Shortcuts: <b>+100</b> and <b>+1K</b> add shares with each tap. <b>Max</b> fills in the most you can afford. <b>All</b> fills in every share you own, for selling. <b>Clear</b> starts over.'},
-  {sel:'#sheet .acts', text:'<b>Buy</b> and <b>Sell</b> (they say “at open” before the market opens). Every trade costs a <b>$10 fee</b>, so lots of tiny trades eat into your profit. To make money, sell for more than you paid.'},
-  {sel:'#sheet .otypes', setup:()=>tutTrade('plan','obuy'), text:'<b>Buy at open / Sell at open:</b> trades the moment the bell rings. Great for acting on the morning paper or Marty’s read.<br><b>Limit buy:</b> buys only if the price drops to your number.<br><b>Take profit:</b> sells when the price rises to your target.<br><b>Stop-loss:</b> sells if the price falls to your floor, so a crash can’t wipe you out.'},
-  {sel:'#op', hl:'parent', setup:()=>tutTrade('plan','stop'), text:'Limit, take-profit and stop-loss orders need a <b>trigger price</b>. The <b>−10%…+10%</b> buttons below set it quickly. This stop-loss would sell if the price fell 10%.'},
-  {sel:'#placeB', text:'<b>Place order</b> saves it. Orders stay until they fill or you cancel them. Stocks with waiting orders show a 📋 badge, and you can manage all orders on the Money tab. If a stop-loss sells your shares, your take-profit on that stock cancels automatically.'},
-  {sel:'#openBtn', setup:()=>{ if($('#q')) $('#q').value=''; closeSheet(); window.scrollTo(0,0); },
-   text:'Each trading day has three stops. <b>Now (pre-market):</b> read the paper and place trades. Tap <b>Open the market</b> to jump to <b>midday</b>: see the morning’s moves and breaking news, and trade again. Then <b>ring the closing bell</b> for your daily report. The blue <b>⏩ WEEK</b> button plays out the rest of the week for you without stopping. Any life events or messages pop up after the weekly summary.'},
-  {sel:'nav', text:'<b>Money:</b> your stocks, homes, loans, orders and bills.<br><b>People:</b> Marty, Delia, Ray, Mr. Whitlock, Jordan and Victor.<br><b>Goals:</b> Edna’s list and deadlines.<br><b>Log:</b> everything that has happened.<br>You’re ready. Good luck!'},
+  {sel:'.paper', setup:()=>{ closeSheet(); tab='market'; render(); },
+   text:'<b>1 · Read the paper.</b> These headlines move prices when the market opens. <b>✅ Solid</b> stories usually hold up; <b>⚠️ Shaky</b> ones often fall apart. Tap a headline to read it.'},
+  {sel:'.card .row', text:'<b>2 · Buy a stock.</b> Tap any company, pick how many shares, and press <b>Buy</b>. Before the open, your order fills at the 9:30 price. Marty’s card (above the paper) suggests cheap stocks.'},
+  {sel:'#openBtn', setup:()=>{ window.scrollTo(0,0); },
+   text:'<b>3 · Open the market.</b> This jumps to <b>midday</b>. See how your stocks moved and any breaking news, and trade again if you want.'},
+  {sel:'#openBtn', text:'<b>4 · Ring the closing bell.</b> Tap the same button again to end the day and see your report. Then do it all again tomorrow, and buy Edna’s goals from the <b>Goals</b> tab before their deadlines. That’s it! You’ll pick up the rest as you go.'},
 ];
 function startTutorial(){ tutOn=true; tutI=0; stopTimer(); showTut(); }
 function showTut(){
@@ -1863,6 +1815,7 @@ function placeTut(el,st){
 function endTut(){
   tutOn=false; $('#tut')?.remove(); if($('#q')) $('#q').value=''; closeSheet();
   tradeMode='now'; orderType='obuy'; tab='market'; S.tutDone=true; save(); render(); window.scrollTo(0,0);
+  tipOnce('marty'); save(); render();
   toast('Tap 🔔 Open the market when you’re ready!');
 }
 function tutNav(k){
@@ -1920,14 +1873,17 @@ document.addEventListener('click',e=>{
   if(a==='reset') confirmReset();
   if(a==='storyskip'){ showStory(STORY.length-1); }
   if(a==='tutstart'){ finishStory(); closeSheet(); startTutorial(); }
-  if(a==='tutno'){ finishStory(); closeSheet(); render(); toast('Tap 🔔 Open the market when you’re ready!'); }
+  if(a==='tutno'){ finishStory(); tipOnce('marty'); closeSheet(); render(); toast('Tap 🔔 Open the market when you’re ready!'); }
   if(a==='story'){ showStory(0); }
   if(a==='tutorial'){ closeSheet(); startTutorial(); }
   if(a==='newgame'){ stopTimer(); newGame(); morningRead(); S.intro=false; S.storySeen=true; tab='market'; closeSheet(); render(); toast('New game — good luck!'); }
   if(a==='read') freeRead();
   if(a==='read2'){ freeRead(true); sfx('click'); }
-  if(a==='dinner') dinner();
-  if(a==='bet'){ closeSheet(); S.queue.push({type:'event',id:'bet',d:EVENTS.bet.data()}); save(); showQueue(); }
+  if(a==='hintok'){ (S.hintQ||[]).shift(); save(); render(); }
+  if(a==='chkoff'){ S.chkOff=true; save(); render(); }
+  if(a==='adv'){ advOpen=!advOpen; if(!advOpen) tradeMode='now'; openTrade(sheetSym); }
+  if(a==='goalsall'){ goalsAll=!goalsAll; render(); }
+  if(a==='badges'){ S.badges=S.badges===false; save(); render(); }
   if(a==='lastrep'){ showReport(S.lastReport,false); }
   if(a==='lastweek'){ showWeek(S.lastWeek,false); }
   if(a==='togrep'){ S.showReport=S.showReport===false; save(); render(); }
@@ -1954,13 +1910,19 @@ $('#skipBtn').addEventListener('click',skipToClose);
 
 // ================= BOOT =================
 if(!load()) newGame();
+// Victor & Jordan storylines were removed: drop their leftover events and wagers
+S.queue=(S.queue||[]).filter(q=>q.type!=='event'||EVENTS[q.id]);
+S.pending=(S.pending||[]).filter(p=>p.type!=='bet');
+if(S.over==='rival') S.over=null;
+if(!S.tipsSeen){ S.tipsSeen={}; S.hintQ=[]; if(S.day>10) Object.keys(TIPS).forEach(k=>S.tipsSeen[k]=true); }
+if(!S.met){ S.met={marty:true,delia:true,ray:true,whitlock:true}; }
 morningRead();
 // keep each company's market sensitivity in line with its profile (older saves used random values)
 S.stocks.forEach(s=>{ const P=PROFILES[s.sym]; if(P && !s.betaFixed){ s.beta=P.beta*rnd(.9,1.1); s.betaFixed=true; } });
 // switch saves from the old 1,095-day count to trading days
 if(!S.cal){
   const cv=d=>typeof d==='number'&&d>=0?tradingIndexByCal(d):d;
-  S.day=cv(S.day); ['martyBan','lastEvent','tipDay','readDay','dinnerDay'].forEach(k=>S[k]=cv(S[k]));
+  S.day=cv(S.day); ['martyBan','lastEvent','tipDay','readDay'].forEach(k=>S[k]=cv(S[k]));
   (S.pending||[]).forEach(p=>p.day=cv(p.day)); (S.log||[]).forEach(l=>l.day=cv(l.day));
   if(S.seen&&S.seen.galaDay) S.seen.galaDay=cv(S.seen.galaDay);
   Object.values(S.holdings||{}).forEach(hh=>{ (hh.lots||[]).forEach(l=>l.day=cv(l.day)); (hh.sells||[]).forEach(x=>x.day=cv(x.day)); });
